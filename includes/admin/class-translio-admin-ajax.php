@@ -284,7 +284,16 @@ class Translio_Admin_Ajax {
         $object_type = isset($_POST['object_type']) ? sanitize_text_field($_POST['object_type']) : 'post';
 
         if ($field_name === 'all') {
-            $result = $api->translate_post($post_id, $secondary_language);
+            // Get list of field names from the request (sent by JS from visible fields)
+            $field_names = isset($_POST['field_names']) ? array_map('sanitize_text_field', (array) $_POST['field_names']) : array();
+
+            if (!empty($field_names)) {
+                // Translate exactly the fields visible on the page
+                $result = $this->translate_fields_by_names($post_id, $field_names, $secondary_language);
+            } else {
+                // Fallback to translate_post if no field names provided
+                $result = $api->translate_post($post_id, $secondary_language);
+            }
         } else {
             $content = '';
 
@@ -393,6 +402,133 @@ class Translio_Admin_Ajax {
             'message' => __('Translated', 'translio'),
             'translations' => $result,
         ));
+    }
+
+    /**
+     * Translate specific fields by their names
+     *
+     * @param int $post_id Post ID
+     * @param array $field_names Array of field names (e.g., ['title', 'content', 'meta_hero_badge'])
+     * @param string $target_language Target language code
+     * @return array|WP_Error Array of translations or error
+     */
+    private function translate_fields_by_names($post_id, $field_names, $target_language) {
+        $post = get_post($post_id);
+        if (!$post) {
+            return new WP_Error('post_not_found', __('Post not found', 'translio'));
+        }
+
+        $post_type = $post->post_type;
+        $api = Translio_API::instance();
+        $texts_to_translate = array();
+
+        // Collect content for each field
+        foreach ($field_names as $field_name) {
+            $content = '';
+
+            switch ($field_name) {
+                case 'title':
+                    $content = $post->post_title;
+                    break;
+                case 'content':
+                    $content = $post->post_content;
+                    break;
+                case 'excerpt':
+                    $content = $post->post_excerpt;
+                    break;
+                case 'seo_title':
+                    if (defined('WPSEO_VERSION')) {
+                        $content = get_post_meta($post_id, '_yoast_wpseo_title', true);
+                    } elseif (class_exists('RankMath')) {
+                        $content = get_post_meta($post_id, 'rank_math_title', true);
+                    } elseif (defined('AIOSEO_VERSION')) {
+                        $content = get_post_meta($post_id, '_aioseo_title', true);
+                    }
+                    break;
+                case 'seo_description':
+                    if (defined('WPSEO_VERSION')) {
+                        $content = get_post_meta($post_id, '_yoast_wpseo_metadesc', true);
+                    } elseif (class_exists('RankMath')) {
+                        $content = get_post_meta($post_id, 'rank_math_description', true);
+                    } elseif (defined('AIOSEO_VERSION')) {
+                        $content = get_post_meta($post_id, '_aioseo_description', true);
+                    }
+                    break;
+                default:
+                    // Handle meta fields
+                    if (strpos($field_name, 'meta_') === 0) {
+                        $meta_key = substr($field_name, 5); // Remove 'meta_' prefix
+                        $content = get_post_meta($post_id, $meta_key, true);
+                    }
+                    break;
+            }
+
+            if (!empty($content) && is_string($content)) {
+                $texts_to_translate[] = array(
+                    'id' => $field_name,
+                    'text' => $content,
+                    'context' => $this->get_field_context($field_name, $post)
+                );
+            }
+        }
+
+        if (empty($texts_to_translate)) {
+            return array();
+        }
+
+        Translio_Logger::debug('Translating ' . count($texts_to_translate) . ' fields by name: ' . implode(', ', wp_list_pluck($texts_to_translate, 'id')), Translio_Logger::CAT_API);
+
+        // Batch translate all fields
+        $batch_result = $api->translate_batch($texts_to_translate, $target_language);
+
+        if (is_wp_error($batch_result)) {
+            return $batch_result;
+        }
+
+        $translations = array();
+
+        // Save translations
+        foreach ($texts_to_translate as $item) {
+            $field_name = $item['id'];
+            if (isset($batch_result[$field_name])) {
+                Translio_DB::save_translation(
+                    $post_id,
+                    $post_type,
+                    $field_name,
+                    $target_language,
+                    $item['text'],
+                    $batch_result[$field_name],
+                    true
+                );
+                $translations[$field_name] = $batch_result[$field_name];
+            }
+        }
+
+        return $translations;
+    }
+
+    /**
+     * Get translation context for a field
+     */
+    private function get_field_context($field_name, $post) {
+        switch ($field_name) {
+            case 'title':
+                return 'Page/post title';
+            case 'content':
+                return 'Main page/post content - preserve all HTML tags and shortcodes';
+            case 'excerpt':
+                return 'Short description/excerpt';
+            case 'seo_title':
+                return 'SEO meta title';
+            case 'seo_description':
+                return 'SEO meta description';
+            default:
+                if (strpos($field_name, 'meta_') === 0) {
+                    $label = Translio_Utils::format_meta_key_label(substr($field_name, 5));
+                    return 'Custom field: ' . $label;
+                }
+                return 'Field: ' . $field_name;
+        }
     }
 
     /**

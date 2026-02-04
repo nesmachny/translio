@@ -506,6 +506,18 @@
             var $btn = $(e.currentTarget);
             var postId = $btn.data('post-id');
 
+            // Collect all field names from the page to ensure we translate exactly what's displayed
+            var fieldNames = [];
+            $('[name^="translio_"]').each(function() {
+                var name = $(this).attr('name');
+                if (name && name.indexOf('translio_') === 0) {
+                    var fieldName = name.replace('translio_', '');
+                    if (fieldName && fieldNames.indexOf(fieldName) === -1) {
+                        fieldNames.push(fieldName);
+                    }
+                }
+            });
+
             $btn.addClass('loading').prop('disabled', true).text(translioAdmin.strings.translating);
             self.showLoader('Translating all fields');
 
@@ -515,7 +527,8 @@
                 data: Translio.getAjaxData({
                     action: 'translio_translate_single',
                     post_id: postId,
-                    field_name: 'all'
+                    field_name: 'all',
+                    field_names: fieldNames
                 }),
                 success: function(response) {
                     if (response.success && response.data.translations) {

@@ -144,8 +144,11 @@ class Translio_Utils {
         $all_meta = get_post_meta($post_id);
 
         if (empty($all_meta)) {
+            Translio_Logger::debug('No meta found for post ' . $post_id, Translio_Logger::CAT_API);
             return $fields;
         }
+
+        Translio_Logger::debug('Processing ' . count($all_meta) . ' meta keys for post ' . $post_id, Translio_Logger::CAT_API);
 
         // Meta keys to always exclude (WordPress internals, plugin internals)
         $excluded_prefixes = array(
@@ -176,27 +179,42 @@ class Translio_Utils {
                     break;
                 }
             }
-            if ($skip) continue;
+            if ($skip) {
+                continue;
+            }
 
             // Skip exact matches
-            if (in_array($meta_key, $excluded_exact)) continue;
+            if (in_array($meta_key, $excluded_exact)) {
+                continue;
+            }
 
             // Skip underscore-prefixed keys (internal)
-            if (strpos($meta_key, '_') === 0) continue;
+            if (strpos($meta_key, '_') === 0) {
+                continue;
+            }
 
             // Skip serialized/array data
-            if (is_serialized($meta_value)) continue;
+            if (is_serialized($meta_value)) {
+                Translio_Logger::debug('Skipping serialized meta: ' . $meta_key, Translio_Logger::CAT_API);
+                continue;
+            }
 
             // Skip if not a string
-            if (!is_string($meta_value)) continue;
+            if (!is_string($meta_value)) {
+                Translio_Logger::debug('Skipping non-string meta: ' . $meta_key . ' (type: ' . gettype($meta_value) . ')', Translio_Logger::CAT_API);
+                continue;
+            }
 
             // Use shared skip logic
             if (self::should_skip_meta_translation($meta_key, $meta_value)) {
+                Translio_Logger::debug('Skipping meta (skip logic): ' . $meta_key . ' = ' . substr($meta_value, 0, 30), Translio_Logger::CAT_API);
                 continue;
             }
 
             // Create label from key
             $label = self::format_meta_key_label($meta_key);
+
+            Translio_Logger::debug('Including meta field: ' . $meta_key . ' = ' . substr($meta_value, 0, 50), Translio_Logger::CAT_API);
 
             $fields[] = array(
                 'id' => 'meta_' . $meta_key,
@@ -207,6 +225,7 @@ class Translio_Utils {
             );
         }
 
+        Translio_Logger::debug('Extracted ' . count($fields) . ' translatable meta fields', Translio_Logger::CAT_API);
         return $fields;
     }
 
