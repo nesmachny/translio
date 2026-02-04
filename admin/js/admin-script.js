@@ -117,6 +117,9 @@
                 case 'translio-translate-avada':
                     TranslioTranslateAvada.init();
                     break;
+                case 'translio-settings':
+                    TranslioSettings.init();
+                    break;
             }
         },
 
@@ -2915,6 +2918,59 @@
             }).fail(function() {
                 Translio.alert(translioAdmin.strings.feedbackError || 'Failed to send feedback.', 'error');
                 $btn.prop('disabled', false).text(originalText);
+            });
+        }
+    };
+
+    // ========================================
+    // SETTINGS PAGE MODULE
+    // ========================================
+    var TranslioSettings = {
+        init: function() {
+            this.bindEvents();
+        },
+
+        bindEvents: function() {
+            var self = this;
+            $('#translio-check-updates').on('click', function() {
+                self.checkUpdates($(this));
+            });
+        },
+
+        checkUpdates: function($btn) {
+            var $status = $('#translio-update-status');
+            var originalText = $btn.text();
+
+            $btn.prop('disabled', true).text('Checking...');
+            $status.html('<span style="color: #666;">Checking for updates...</span>');
+
+            $.ajax({
+                url: translioAdmin.ajaxUrl,
+                method: 'POST',
+                data: {
+                    action: 'translio_check_updates',
+                    nonce: translioAdmin.nonce
+                }
+            }).done(function(response) {
+                $btn.prop('disabled', false).text(originalText);
+
+                if (response.success) {
+                    var data = response.data;
+                    if (data.update_available) {
+                        $status.html(
+                            '<span style="color: #d63638; font-weight: bold;">Update available: v' + data.latest_version + '</span> ' +
+                            '<a href="' + translioAdmin.adminUrl + 'plugins.php" class="button button-small button-primary" style="margin-left: 5px;">Update now</a>'
+                        );
+                    } else {
+                        $status.html('<span style="color: #00a32a;">✓ You have the latest version</span>');
+                        setTimeout(function() { $status.fadeOut(300); }, 3000);
+                    }
+                } else {
+                    $status.html('<span style="color: #d63638;">Error: ' + (response.data.message || 'Unknown error') + '</span>');
+                }
+            }).fail(function() {
+                $btn.prop('disabled', false).text(originalText);
+                $status.html('<span style="color: #d63638;">Failed to check for updates</span>');
             });
         }
     };

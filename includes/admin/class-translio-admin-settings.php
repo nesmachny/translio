@@ -39,6 +39,10 @@ class Translio_Admin_Settings {
                 <img src="<?php echo esc_url(TRANSLIO_PLUGIN_URL . 'admin/images/logo.png'); ?>" alt="Translio" class="translio-logo">
                 <?php esc_html_e('Settings', 'translio'); ?>
                 <span class="translio-version">v<?php echo esc_html(TRANSLIO_VERSION); ?></span>
+                <button type="button" id="translio-check-updates" class="button button-small" style="margin-left: 10px; vertical-align: middle;">
+                    <?php esc_html_e('Check for updates', 'translio'); ?>
+                </button>
+                <span id="translio-update-status" style="margin-left: 10px; vertical-align: middle;"></span>
             </h1>
 
             <!-- License Card -->

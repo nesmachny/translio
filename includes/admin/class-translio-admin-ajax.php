@@ -34,6 +34,9 @@ class Translio_Admin_Ajax {
         add_action('wp_ajax_translio_tm_suggest', array($this, 'tm_suggest'));
         add_action('wp_ajax_translio_tm_stats', array($this, 'tm_stats'));
 
+        // Update check handler
+        add_action('wp_ajax_translio_check_updates', array($this, 'check_updates'));
+
         // Taxonomy AJAX handlers
         add_action('wp_ajax_translio_translate_term_field', array($this, 'translate_term_field'));
         add_action('wp_ajax_translio_translate_taxonomy_term', array($this, 'translate_taxonomy_term'));
@@ -2109,6 +2112,56 @@ class Translio_Admin_Ajax {
             'message' => sprintf('Created %d new pages', $created),
             'created' => $created,
             'results' => $results,
+        ));
+    }
+
+    /**
+     * Check for plugin updates
+     */
+    public function check_updates() {
+        check_ajax_referer('translio_nonce', 'nonce');
+
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(array('message' => __('Permission denied', 'translio')));
+        }
+
+        // Clear update cache
+        delete_transient('translio_update_data');
+        delete_site_transient('update_plugins');
+
+        // Fetch latest version from update server
+        $response = wp_remote_get(
+            'https://api.translio.to/wp-json/translio/v1/update-check?slug=translio&version=' . TRANSLIO_VERSION,
+            array(
+                'timeout' => 15,
+                'headers' => array('Accept' => 'application/json'),
+            )
+        );
+
+        if (is_wp_error($response)) {
+            wp_send_json_error(array('message' => $response->get_error_message()));
+        }
+
+        $code = wp_remote_retrieve_response_code($response);
+        if ($code !== 200) {
+            wp_send_json_error(array('message' => __('Failed to check for updates', 'translio')));
+        }
+
+        $data = json_decode(wp_remote_retrieve_body($response), true);
+
+        if (empty($data) || !isset($data['version'])) {
+            wp_send_json_error(array('message' => __('Invalid response from update server', 'translio')));
+        }
+
+        // Force WordPress to recheck plugin updates
+        wp_update_plugins();
+
+        wp_send_json_success(array(
+            'current_version' => TRANSLIO_VERSION,
+            'latest_version' => $data['version'],
+            'update_available' => version_compare(TRANSLIO_VERSION, $data['version'], '<'),
+            'download_url' => isset($data['download_url']) ? $data['download_url'] : '',
+            'changelog' => isset($data['changelog']) ? $data['changelog'] : '',
         ));
     }
 }

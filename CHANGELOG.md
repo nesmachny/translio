@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.3.2] - 2026-02-04
 
+### Added
+- **Check for Updates Button**: Added "Check for updates" button on Settings page next to version number. Instantly checks for new versions without waiting for 12-hour cache.
+
 ### Fixed
 - **Meta Fields Translation**: Fixed AJAX handler `translate_single_post` to actually translate meta fields. Previously only title/content/excerpt were translated, meta fields were ignored.
 

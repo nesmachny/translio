@@ -322,6 +322,7 @@ class Translio_Admin {
 
         wp_localize_script('translio-admin', 'translioAdmin', array(
             'ajaxUrl' => admin_url('admin-ajax.php'),
+            'adminUrl' => admin_url(),
             'nonce' => wp_create_nonce('translio_nonce'),
             'adminEmail' => get_option('admin_email'),
             'siteUrl' => home_url(),
