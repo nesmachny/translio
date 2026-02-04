@@ -263,7 +263,9 @@ class Translio_Admin_CF7 {
             if (!is_array($messages)) $messages = array();
         }
 
-        $has_api_key = !empty(Translio_Admin::decrypt_api_key());
+        // Check if translation is available (BYOAI with API key OR proxy mode with valid license)
+        $api = Translio_API::instance();
+        $can_translate = $api->is_configured();
 
         ?>
         <div class="wrap translio-translate">
@@ -285,7 +287,7 @@ class Translio_Admin_CF7 {
                     </span>
                 </div>
 
-                <?php if ($has_api_key) : ?>
+                <?php if ($can_translate) : ?>
                 <button type="button" class="button button-primary" id="translio-translate-cf7-all"
                         data-form-id="<?php echo esc_attr($form_id); ?>">
                     <?php esc_html_e('Auto-translate all fields', 'translio'); ?>
@@ -315,7 +317,7 @@ class Translio_Admin_CF7 {
                         <div class="translio-panel translio-panel-translation">
                             <div class="translio-panel-header">
                                 <?php echo esc_html($languages[$secondary_language]['name']); ?>
-                                <?php if ($has_api_key) : ?>
+                                <?php if ($can_translate) : ?>
                                 <button type="button" class="button button-small translio-translate-cf7-field"
                                         data-field="title"
                                         data-original="<?php echo esc_attr($form->post_title); ?>">
@@ -361,7 +363,7 @@ class Translio_Admin_CF7 {
                         <div class="translio-panel translio-panel-translation">
                             <div class="translio-panel-header">
                                 <?php echo esc_html($languages[$secondary_language]['name']); ?>
-                                <?php if ($has_api_key) : ?>
+                                <?php if ($can_translate) : ?>
                                 <button type="button" class="button button-small translio-translate-cf7-field"
                                         data-field="form"
                                         data-original="<?php echo esc_attr($form_content); ?>">
@@ -404,7 +406,7 @@ class Translio_Admin_CF7 {
                         <div class="translio-panel translio-panel-translation">
                             <div class="translio-panel-header">
                                 <?php echo esc_html($languages[$secondary_language]['name']); ?>
-                                <?php if ($has_api_key) : ?>
+                                <?php if ($can_translate) : ?>
                                 <button type="button" class="button button-small translio-translate-cf7-field"
                                         data-field="mail_subject"
                                         data-original="<?php echo esc_attr($mail['subject']); ?>">
@@ -451,7 +453,7 @@ class Translio_Admin_CF7 {
                         <div class="translio-panel translio-panel-translation">
                             <div class="translio-panel-header">
                                 <?php echo esc_html($languages[$secondary_language]['name']); ?>
-                                <?php if ($has_api_key) : ?>
+                                <?php if ($can_translate) : ?>
                                 <button type="button" class="button button-small translio-translate-cf7-field"
                                         data-field="mail_body"
                                         data-original="<?php echo esc_attr($mail['body']); ?>">
@@ -517,7 +519,7 @@ class Translio_Admin_CF7 {
                         <div class="translio-panel translio-panel-translation">
                             <div class="translio-panel-header">
                                 <?php echo esc_html($languages[$secondary_language]['name']); ?>
-                                <?php if ($has_api_key) : ?>
+                                <?php if ($can_translate) : ?>
                                 <button type="button" class="button button-small translio-translate-cf7-field"
                                         data-field="message_<?php echo esc_attr($key); ?>"
                                         data-original="<?php echo esc_attr($message); ?>">

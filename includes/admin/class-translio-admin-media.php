@@ -59,7 +59,9 @@ class Translio_Admin_Media {
         $query = new WP_Query($args);
 
         // Count untranslated media
-        $has_api_key = !empty(Translio_Admin::decrypt_api_key());
+        // Check if translation is available (BYOAI with API key OR proxy mode with valid license)
+        $api = Translio_API::instance();
+        $can_translate = $api->is_configured();
         $untranslated_count = 0;
         $all_attachments = get_posts(array(
             'post_type' => 'attachment',
@@ -98,7 +100,7 @@ class Translio_Admin_Media {
                 </form>
             </div>
 
-            <?php if ($has_api_key) : ?>
+            <?php if ($can_translate) : ?>
             <div class="translio-bulk-actions" style="margin: 15px 0;">
                 <button type="button" class="button button-primary" id="translio-translate-selected-media" disabled>
                     <?php esc_html_e('Translate Selected', 'translio'); ?>
@@ -218,7 +220,7 @@ class Translio_Admin_Media {
                                    class="button button-small">
                                     <?php esc_html_e('Edit', 'translio'); ?>
                                 </a>
-                                <?php if ($is_untranslated && $has_api_key) : ?>
+                                <?php if ($is_untranslated && $can_translate) : ?>
                                 <button type="button" class="button button-small button-primary translio-translate-media-inline"
                                         data-attachment-id="<?php echo esc_attr($attachment_id); ?>">
                                     <?php esc_html_e('Translate', 'translio'); ?>
@@ -397,7 +399,9 @@ class Translio_Admin_Media {
         $caption_trans = Translio_DB::get_translation($attachment_id, 'attachment', 'caption', $secondary_language);
         $desc_trans = Translio_DB::get_translation($attachment_id, 'attachment', 'description', $secondary_language);
 
-        $has_api_key = !empty(Translio_Admin::decrypt_api_key());
+        // Check if translation is available (BYOAI with API key OR proxy mode with valid license)
+        $api = Translio_API::instance();
+        $can_translate = $api->is_configured();
 
         ?>
         <div class="wrap translio-translate">
@@ -419,7 +423,7 @@ class Translio_Admin_Media {
                     </span>
                 </div>
 
-                <?php if ($has_api_key) : ?>
+                <?php if ($can_translate) : ?>
                 <button type="button" class="button button-primary" id="translio-translate-media-all"
                         data-attachment-id="<?php echo esc_attr($attachment_id); ?>">
                     <?php esc_html_e('Auto-translate all fields', 'translio'); ?>
@@ -459,7 +463,7 @@ class Translio_Admin_Media {
                         <div class="translio-panel translio-panel-translation">
                             <div class="translio-panel-header">
                                 <?php echo esc_html($languages[$secondary_language]['name']); ?>
-                                <?php if ($has_api_key && !empty($alt_text)) : ?>
+                                <?php if ($can_translate && !empty($alt_text)) : ?>
                                 <button type="button" class="button button-small translio-translate-field"
                                         data-field="alt">
                                     <?php esc_html_e('Translate', 'translio'); ?>
@@ -497,7 +501,7 @@ class Translio_Admin_Media {
                         <div class="translio-panel translio-panel-translation">
                             <div class="translio-panel-header">
                                 <?php echo esc_html($languages[$secondary_language]['name']); ?>
-                                <?php if ($has_api_key) : ?>
+                                <?php if ($can_translate) : ?>
                                 <button type="button" class="button button-small translio-translate-field"
                                         data-field="title">
                                     <?php esc_html_e('Translate', 'translio'); ?>
@@ -535,7 +539,7 @@ class Translio_Admin_Media {
                         <div class="translio-panel translio-panel-translation">
                             <div class="translio-panel-header">
                                 <?php echo esc_html($languages[$secondary_language]['name']); ?>
-                                <?php if ($has_api_key) : ?>
+                                <?php if ($can_translate) : ?>
                                 <button type="button" class="button button-small translio-translate-field"
                                         data-field="caption">
                                     <?php esc_html_e('Translate', 'translio'); ?>
@@ -573,7 +577,7 @@ class Translio_Admin_Media {
                         <div class="translio-panel translio-panel-translation">
                             <div class="translio-panel-header">
                                 <?php echo esc_html($languages[$secondary_language]['name']); ?>
-                                <?php if ($has_api_key) : ?>
+                                <?php if ($can_translate) : ?>
                                 <button type="button" class="button button-small translio-translate-field"
                                         data-field="description">
                                     <?php esc_html_e('Translate', 'translio'); ?>

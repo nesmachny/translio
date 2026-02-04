@@ -185,7 +185,9 @@ class Translio_Admin_Avada {
             return;
         }
 
-        $has_api_key = !empty(Translio_Admin::decrypt_api_key());
+        // Check if translation is available (BYOAI with API key OR proxy mode with valid license)
+        $api = Translio_API::instance();
+        $can_translate = $api->is_configured();
 
         $fields_status = Translio_Avada::get_fields_status($post_id, $secondary_language);
 
@@ -214,7 +216,7 @@ class Translio_Admin_Avada {
                     </span>
                 </div>
 
-                <?php if ($has_api_key) : ?>
+                <?php if ($can_translate) : ?>
                 <div class="translio-translate-actions">
                     <button type="button" id="translio-translate-all-avada" class="button button-primary">
                         <?php esc_html_e('Auto-translate All', 'translio'); ?>
@@ -282,7 +284,7 @@ class Translio_Admin_Avada {
                                     <?php endif; ?>
                                 </td>
                                 <td>
-                                    <?php if ($has_api_key) : ?>
+                                    <?php if ($can_translate) : ?>
                                     <button type="button" class="button button-small translio-translate-avada-field"
                                             data-field-id="<?php echo esc_attr($field_id); ?>">
                                         <?php esc_html_e('Translate', 'translio'); ?>

@@ -49,7 +49,9 @@ class Translio_Admin_Options {
         $blogname_trans = Translio_DB::get_translation(1, 'option', 'blogname', $secondary_language);
         $blogdesc_trans = Translio_DB::get_translation(1, 'option', 'blogdescription', $secondary_language);
 
-        $has_api_key = !empty(Translio_Admin::decrypt_api_key());
+        // Check if translation is available (BYOAI with API key OR proxy mode with valid license)
+        $api = Translio_API::instance();
+        $can_translate = $api->is_configured();
 
         // Get widgets
         global $wp_registered_sidebars, $wp_registered_widgets;
@@ -94,7 +96,7 @@ class Translio_Admin_Options {
                         <div class="translio-panel translio-panel-translation">
                             <div class="translio-panel-header">
                                 <?php echo esc_html($languages[$secondary_language]['name']); ?>
-                                <?php if ($has_api_key) : ?>
+                                <?php if ($can_translate) : ?>
                                 <button type="button" class="button button-small translio-translate-option"
                                         data-option="blogname"
                                         data-original="<?php echo esc_attr($blogname); ?>">
@@ -132,7 +134,7 @@ class Translio_Admin_Options {
                         <div class="translio-panel translio-panel-translation">
                             <div class="translio-panel-header">
                                 <?php echo esc_html($languages[$secondary_language]['name']); ?>
-                                <?php if ($has_api_key) : ?>
+                                <?php if ($can_translate) : ?>
                                 <button type="button" class="button button-small translio-translate-option"
                                         data-option="blogdescription"
                                         data-original="<?php echo esc_attr($blogdescription); ?>">

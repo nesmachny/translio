@@ -188,7 +188,9 @@ class Translio_Admin_Divi {
             return;
         }
 
-        $has_api_key = !empty(Translio_Admin::decrypt_api_key());
+        // Check if translation is available (BYOAI with API key OR proxy mode with valid license)
+        $api = Translio_API::instance();
+        $can_translate = $api->is_configured();
 
         // Get fields status
         $fields_status = Translio_Divi::get_fields_status($post_id, $secondary_language);
@@ -218,7 +220,7 @@ class Translio_Admin_Divi {
                     </span>
                 </div>
 
-                <?php if ($has_api_key) : ?>
+                <?php if ($can_translate) : ?>
                 <div class="translio-translate-actions">
                     <button type="button" id="translio-translate-all-divi" class="button button-primary">
                         <?php esc_html_e('Auto-translate All', 'translio'); ?>
@@ -288,7 +290,7 @@ class Translio_Admin_Divi {
                                     <?php endif; ?>
                                 </td>
                                 <td>
-                                    <?php if ($has_api_key) : ?>
+                                    <?php if ($can_translate) : ?>
                                     <button type="button" class="button button-small translio-translate-divi-field"
                                             data-field-id="<?php echo esc_attr($field_id); ?>">
                                         <?php esc_html_e('Translate', 'translio'); ?>

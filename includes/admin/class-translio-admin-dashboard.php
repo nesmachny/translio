@@ -22,7 +22,9 @@ class Translio_Admin_Dashboard {
         $default_language = translio()->get_setting('default_language');
         $secondary_language = Translio_Admin::get_admin_language(); // Use selected language
         $languages = Translio::get_available_languages();
-        $has_api_key = !empty(Translio_Admin::decrypt_api_key());
+        // Check if translation is available (BYOAI with API key OR proxy mode with valid license)
+        $api = Translio_API::instance();
+        $can_translate = $api->is_configured();
 
         if (empty($secondary_language)) {
             ?>
@@ -58,7 +60,7 @@ class Translio_Admin_Dashboard {
                     <span class="translio-arrow">→</span>
                     <span class="translio-badge translio-badge-secondary"><?php echo esc_html($secondary_lang_name); ?></span>
                 </div>
-                <?php if (!$has_api_key): ?>
+                <?php if (!$can_translate): ?>
                 <div class="translio-api-warning">
                     <span class="dashicons dashicons-warning"></span>
                     <?php esc_html_e('API key not configured.', 'translio'); ?>
@@ -129,7 +131,7 @@ class Translio_Admin_Dashboard {
                         <a href="<?php echo esc_url($type_data['url']); ?>" class="button button-small">
                             <?php esc_html_e('Manage', 'translio'); ?>
                         </a>
-                        <?php if ($type_data['total'] - $type_data['translated'] > 0 && $has_api_key): ?>
+                        <?php if ($type_data['total'] - $type_data['translated'] > 0 && $can_translate): ?>
                         <button type="button" class="button button-primary button-small translio-quick-translate"
                             data-type="<?php echo esc_attr($type_key); ?>">
                             <?php esc_html_e('Translate All', 'translio'); ?>

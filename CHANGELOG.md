@@ -5,10 +5,21 @@ All notable changes to Translio plugin will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.3.9] - 2026-02-04
+## [2.3.10] - 2026-02-04
 
 ### Fixed
-- **Taxonomies Page Buttons**: Fixed missing translate buttons on Taxonomies list and individual term edit pages for proxy mode users (was checking only for API key instead of `is_configured()`)
+- **All Admin Pages Buttons**: Fixed missing translate buttons across ALL admin pages for proxy mode users:
+  - Taxonomies (list and edit pages)
+  - Media (list and edit pages)
+  - Site Options
+  - Theme Strings
+  - Dashboard
+  - WooCommerce attributes
+  - Contact Form 7
+  - Elementor templates
+  - Divi templates
+  - Avada templates
+- Now properly checks `$api->is_configured()` which supports both BYOAI and proxy (credits) mode
 
 ---
 

@@ -218,7 +218,9 @@ class Translio_Admin_Elementor {
             return;
         }
 
-        $has_api_key = !empty(Translio_Admin::decrypt_api_key());
+        // Check if translation is available (BYOAI with API key OR proxy mode with valid license)
+        $api = Translio_API::instance();
+        $can_translate = $api->is_configured();
 
         ?>
         <div class="wrap translio-translate">
@@ -240,7 +242,7 @@ class Translio_Admin_Elementor {
                     </span>
                 </div>
 
-                <?php if ($has_api_key) : ?>
+                <?php if ($can_translate) : ?>
                 <button type="button" class="button button-primary" id="translio-translate-elementor-all"
                         data-post-id="<?php echo esc_attr($post_id); ?>">
                     <?php esc_html_e('Auto-translate all fields', 'translio'); ?>
@@ -283,7 +285,7 @@ class Translio_Admin_Elementor {
                         <div class="translio-panel translio-panel-translation">
                             <div class="translio-panel-header">
                                 <?php echo esc_html($languages[$secondary_language]['name']); ?>
-                                <?php if ($has_api_key) : ?>
+                                <?php if ($can_translate) : ?>
                                 <button type="button" class="button button-small translio-translate-elementor-field"
                                         data-element-id="<?php echo esc_attr($element_id); ?>"
                                         data-field="<?php echo esc_attr($field); ?>"

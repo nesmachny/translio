@@ -59,7 +59,9 @@ class Translio_Admin_WC {
             "SELECT * FROM {$wpdb->prefix}woocommerce_attribute_taxonomies ORDER BY attribute_name"
         );
 
-        $has_api_key = !empty(Translio_Admin::decrypt_api_key());
+        // Check if translation is available (BYOAI with API key OR proxy mode with valid license)
+        $api = Translio_API::instance();
+        $can_translate = $api->is_configured();
 
         ?>
         <div class="wrap translio-translate">
@@ -102,7 +104,7 @@ class Translio_Admin_WC {
                     <?php esc_html_e('Translate WooCommerce product attribute labels. Attribute values (terms) should be translated in the Taxonomies section.', 'translio'); ?>
                 </p>
 
-                <?php if ($has_api_key) : ?>
+                <?php if ($can_translate) : ?>
                 <div class="translio-bulk-actions" style="margin: 15px 0; display: flex; gap: 10px; align-items: center;">
                     <button type="button" class="button" id="translio-wc-translate-selected" disabled>
                         <span class="dashicons dashicons-yes" style="margin-top: 3px;"></span>
@@ -168,7 +170,7 @@ class Translio_Admin_WC {
                                     </div>
                                 </td>
                                 <td>
-                                    <?php if ($has_api_key) : ?>
+                                    <?php if ($can_translate) : ?>
                                     <button type="button"
                                             class="button button-small translio-translate-wc-attr"
                                             data-attr-id="<?php echo esc_attr($attr_id); ?>"

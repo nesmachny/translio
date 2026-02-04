@@ -22,7 +22,9 @@ class Translio_Admin_Strings {
         $secondary_language = Translio_Admin::get_admin_language();
         $default_language = translio()->get_setting('default_language');
         $languages = Translio::get_available_languages();
-        $has_api_key = !empty(Translio_Admin::decrypt_api_key());
+        // Check if translation is available (BYOAI with API key OR proxy mode with valid license)
+        $api = Translio_API::instance();
+        $can_translate = $api->is_configured();
         $scan_enabled = get_option('translio_scan_strings', true);
 
         if (empty($secondary_language)) {
@@ -159,7 +161,7 @@ class Translio_Admin_Strings {
 
             <!-- Actions -->
             <div class="translio-strings-actions" class="translio-my-15">
-                <?php if ($has_api_key) : ?>
+                <?php if ($can_translate) : ?>
                 <button type="button" class="button button-primary" id="translio-translate-all-strings">
                     <?php esc_html_e('Auto-translate Visible', 'translio'); ?>
                 </button>
@@ -226,7 +228,7 @@ class Translio_Admin_Strings {
                         <td class="translio-string-domain"><?php echo esc_html($string->domain); ?></td>
                         <td class="translio-string-actions">
                             <button type="button" class="button button-small translio-save-string"><?php esc_html_e('Save', 'translio'); ?></button>
-                            <?php if ($has_api_key) : ?>
+                            <?php if ($can_translate) : ?>
                             <button type="button" class="button button-small translio-translate-string"><?php esc_html_e('Auto', 'translio'); ?></button>
                             <?php endif; ?>
                         </td>
