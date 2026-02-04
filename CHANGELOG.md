@@ -5,10 +5,17 @@ All notable changes to Translio plugin will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.2] - 2026-02-04
+
+### Fixed
+- **Meta Fields Translation**: Fixed AJAX handler `translate_single_post` to actually translate meta fields. Previously only title/content/excerpt were translated, meta fields were ignored.
+
+---
+
 ## [2.3.1] - 2026-02-04
 
 ### Fixed
-- **Meta Fields Translation**: Fixed custom meta fields (like "Hero Title", etc.) not being translated when clicking "Auto-translate all fields". Aligned filtering patterns between admin display and API translation.
+- **Meta Fields Filtering**: Aligned filtering patterns between admin display and API translation.
 
 ---
 

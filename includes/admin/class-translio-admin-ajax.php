@@ -544,18 +544,15 @@ class Translio_Admin_Ajax {
             }
         }
 
-        if (empty($to_translate)) {
-            wp_send_json_success(array(
-                'message' => __('Already translated', 'translio'),
-                'translated' => 0
-            ));
-        }
+        // Translate basic fields if any need translation
+        $translations = array();
+        if (!empty($to_translate)) {
+            $context = sprintf('Post type: %s, Title: %s', $post->post_type, $post->post_title);
+            $translations = $api->translate_batch($to_translate, $secondary_language, $context);
 
-        $context = sprintf('Post type: %s, Title: %s', $post->post_type, $post->post_title);
-        $translations = $api->translate_batch($to_translate, $secondary_language, $context);
-
-        if (is_wp_error($translations)) {
-            wp_send_json_error($translations->get_error_message());
+            if (is_wp_error($translations)) {
+                wp_send_json_error($translations->get_error_message());
+            }
         }
 
         foreach ($translations as $field => $translated) {
@@ -571,6 +568,12 @@ class Translio_Admin_Ajax {
                 );
                 $translated_fields[] = $field;
             }
+        }
+
+        // Translate meta fields
+        $meta_translations = $api->translate_post_meta($post_id, $secondary_language);
+        if (!is_wp_error($meta_translations) && !empty($meta_translations)) {
+            $translated_fields = array_merge($translated_fields, array_keys($meta_translations));
         }
 
         wp_send_json_success(array(
