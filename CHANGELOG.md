@@ -5,6 +5,31 @@ All notable changes to Translio plugin will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.8] - 2026-02-04
+
+### Fixed
+- **Auto-translate All Fields Button**: Completely fixed meta fields not being translated when clicking "Auto-translate all fields" button
+  - JavaScript now collects visible field names from the page and sends them with the request
+  - New `translate_fields_by_names()` method translates exactly what user sees
+  - This ensures 100% consistency between displayed fields and translated fields
+  - Added debug logging to trace meta field extraction process
+
+---
+
+## [2.3.6] - 2026-02-04
+
+### Fixed
+- **Dashboard Stats**: Fixed translated count showing 0 for pages on dashboard widgets (was using hardcoded 'post' type)
+
+---
+
+## [2.3.5] - 2026-02-04
+
+### Fixed
+- **Meta Fields in AJAX**: Fixed meta fields not translating via `translate_single_post` bulk handler (was using 'post' instead of actual post type when saving)
+
+---
+
 ## [2.3.4] - 2026-02-04
 
 ### Fixed
