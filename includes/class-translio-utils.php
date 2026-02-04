@@ -67,16 +67,11 @@ class Translio_Utils {
         }
 
         // Skip key patterns that indicate non-translatable content
+        // Keep in sync with get_translatable_meta_fields() in class-translio-admin-content.php
         $skip_key_patterns = array(
-            '_link', '_url', '_uri', '_href',
-            '_id', '_ids', '_key', '_keys',
-            '_class', '_classes', '_style', '_styles',
-            '_color', '_colors', '_background', '_bg',
-            '_size', '_width', '_height', '_margin', '_padding', '_border',
-            '_image', '_images', '_icon', '_icons',
-            '_video', '_audio', '_file', '_files', '_media',
-            '_font', '_weight', '_align', '_position',
-            '_target', '_rel', '_type', '_format',
+            '_link', '_url', '_id', '_class', '_style', '_color', '_size',
+            '_image', '_icon', '_video', '_file', '_media', '_background',
+            '_width', '_height', '_margin', '_padding', '_border',
         );
         foreach ($skip_key_patterns as $pattern) {
             if (stripos($key, $pattern) !== false) {
