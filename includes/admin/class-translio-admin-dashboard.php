@@ -345,11 +345,11 @@ class Translio_Admin_Dashboard {
             "SELECT object_id, field_name, original_hash
              FROM {$table_name}
              WHERE object_id IN (" . implode(',', array_fill(0, count($post_ids), '%d')) . ")
-             AND object_type = 'post'
+             AND object_type = %s
              AND language_code = %s
              AND translated_content IS NOT NULL
              AND translated_content != ''",
-            array_merge($post_ids, array($language_code))
+            array_merge($post_ids, array($post_type, $language_code))
         ));
 
         $translations_map = array();
