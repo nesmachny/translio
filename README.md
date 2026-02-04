@@ -2,7 +2,7 @@
 
 A lightweight WordPress translation plugin with Anthropic API integration for automatic translations.
 
-![Version](https://img.shields.io/badge/version-2.3.0-blue)
+![Version](https://img.shields.io/badge/version-2.3.1-blue)
 ![WordPress](https://img.shields.io/badge/WordPress-5.8%2B-green)
 ![PHP](https://img.shields.io/badge/PHP-7.4%2B-purple)
 ![License](https://img.shields.io/badge/license-GPL--2.0-orange)
@@ -160,7 +160,11 @@ add_action('translio_translation_saved', function($object_id, $field, $language,
 
 See [CHANGELOG.md](CHANGELOG.md) for full version history.
 
-### Latest: v2.3.0 (2026-02-04)
+### Latest: v2.3.1 (2026-02-04)
+
+- **Fixed**: Meta fields not translating during auto-translate
+
+### v2.3.0 (2026-02-04)
 
 - **Added**: Multi-language support (up to 4 secondary languages)
 - **Added**: Language selector tabs in admin pages
