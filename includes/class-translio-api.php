@@ -481,8 +481,12 @@ class Translio_API {
 
         // Translate meta fields
         $meta_translations = $this->translate_post_meta($post_id, $target_language);
-        if (!is_wp_error($meta_translations) && !empty($meta_translations)) {
+        if (is_wp_error($meta_translations)) {
+            Translio_Logger::error('Meta translation failed: ' . $meta_translations->get_error_message(), Translio_Logger::CAT_API);
+            // Continue with basic translations, don't fail the whole request
+        } elseif (!empty($meta_translations)) {
             $translations = array_merge($translations, $meta_translations);
+            Translio_Logger::debug('Translated ' . count($meta_translations) . ' meta fields', Translio_Logger::CAT_API);
         }
 
         return $translations;
@@ -498,6 +502,8 @@ class Translio_API {
     public function translate_post_meta($post_id, $target_language) {
         // Use shared utility method for extracting meta fields
         $meta_fields = Translio_Utils::extract_post_meta_fields($post_id);
+
+        Translio_Logger::debug('Found ' . count($meta_fields) . ' meta fields for post ' . $post_id, Translio_Logger::CAT_API);
 
         if (empty($meta_fields)) {
             return array();
@@ -517,18 +523,24 @@ class Translio_API {
                 'text' => $field['text'],
                 'context' => $field['context']
             );
+            Translio_Logger::debug('Meta field to translate: ' . $field['id'] . ' = ' . substr($field['text'], 0, 50), Translio_Logger::CAT_API);
         }
 
         if (empty($texts_to_translate)) {
+            Translio_Logger::debug('No meta texts to translate after filtering', Translio_Logger::CAT_API);
             return array();
         }
 
         // Batch translate
+        Translio_Logger::debug('Batch translating ' . count($texts_to_translate) . ' meta fields', Translio_Logger::CAT_API);
         $batch_result = $this->translate_batch($texts_to_translate, $target_language);
 
         if (is_wp_error($batch_result)) {
+            Translio_Logger::error('Meta batch translate failed: ' . $batch_result->get_error_message(), Translio_Logger::CAT_API);
             return $batch_result;
         }
+
+        Translio_Logger::debug('Meta batch result keys: ' . implode(', ', array_keys($batch_result)), Translio_Logger::CAT_API);
 
         $translations = array();
 
@@ -546,9 +558,13 @@ class Translio_API {
                     true
                 );
                 $translations[$batch_key] = $batch_result[$batch_key];
+                Translio_Logger::debug('Saved meta translation: ' . $batch_key, Translio_Logger::CAT_API);
+            } else {
+                Translio_Logger::warning('Missing batch result for: ' . $batch_key, Translio_Logger::CAT_API);
             }
         }
 
+        Translio_Logger::debug('Returning ' . count($translations) . ' meta translations', Translio_Logger::CAT_API);
         return $translations;
     }
 
