@@ -172,16 +172,20 @@ class Translio_List_Table extends WP_List_Table {
             $translations_table = $wpdb->prefix . 'translio_translations';
             $ids_placeholder = implode(',', array_fill(0, count($post_ids), '%d'));
 
-            // Get translations for all posts in one query
+            // Get unique post types for the results
+            $post_types = array_unique(wp_list_pluck($results, 'post_type'));
+            $types_placeholder = implode(',', array_fill(0, count($post_types), '%s'));
+
+            // Get translations for all posts in one query (match actual post types)
             $translations_query = $wpdb->prepare(
                 "SELECT object_id, field_name, original_hash
                  FROM {$translations_table}
                  WHERE object_id IN ({$ids_placeholder})
-                 AND object_type = 'post'
+                 AND object_type IN ({$types_placeholder})
                  AND language_code = %s
                  AND translated_content IS NOT NULL
                  AND translated_content != ''",
-                array_merge($post_ids, array($this->secondary_language))
+                array_merge($post_ids, $post_types, array($this->secondary_language))
             );
 
             $translations = $wpdb->get_results($translations_query);
