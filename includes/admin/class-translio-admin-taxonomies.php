@@ -95,7 +95,9 @@ class Translio_Admin_Taxonomies {
             }
         }
 
-        $has_api_key = !empty(Translio_Admin::decrypt_api_key());
+        // Check if translation is available (BYOAI with API key OR proxy mode with valid license)
+        $api = Translio_API::instance();
+        $can_translate = $api->is_configured();
 
         ?>
         <div class="wrap">
@@ -141,7 +143,7 @@ class Translio_Admin_Taxonomies {
             <form method="post" id="translio-taxonomies-form">
                 <?php wp_nonce_field('translio_bulk_taxonomies', 'translio_taxonomies_nonce'); ?>
 
-                <?php if ($has_api_key) : ?>
+                <?php if ($can_translate) : ?>
                 <div class="translio-actions-bar" style="margin: 15px 0;">
                     <button type="button" class="button" id="translio-translate-selected-terms" disabled>
                         <span class="dashicons dashicons-yes translio-icon"></span>
@@ -212,7 +214,7 @@ class Translio_Admin_Taxonomies {
                                     </span>
                                 </td>
                                 <td>
-                                    <?php if ($has_api_key && !$is_translated) : ?>
+                                    <?php if ($can_translate && !$is_translated) : ?>
                                     <button type="button" class="button button-small button-primary translio-translate-term-inline"
                                             data-term-id="<?php echo esc_attr($term->term_id); ?>"
                                             data-taxonomy="<?php echo esc_attr($term->taxonomy); ?>"
@@ -379,7 +381,9 @@ class Translio_Admin_Taxonomies {
         $name_trans = Translio_DB::get_translation($term_id, 'term', 'name', $secondary_language);
         $desc_trans = Translio_DB::get_translation($term_id, 'term', 'description', $secondary_language);
 
-        $has_api_key = !empty(Translio_Admin::decrypt_api_key());
+        // Check if translation is available (BYOAI with API key OR proxy mode with valid license)
+        $api = Translio_API::instance();
+        $can_translate = $api->is_configured();
 
         ?>
         <div class="wrap translio-translate">
@@ -424,7 +428,7 @@ class Translio_Admin_Taxonomies {
                         <div class="translio-panel translio-panel-translation">
                             <div class="translio-panel-header">
                                 <?php echo esc_html($languages[$secondary_language]['name']); ?>
-                                <?php if ($has_api_key) : ?>
+                                <?php if ($can_translate) : ?>
                                 <button type="button" class="button button-small translio-translate-term-field"
                                         data-field="name"
                                         data-text="<?php echo esc_attr($term->name); ?>">
@@ -464,7 +468,7 @@ class Translio_Admin_Taxonomies {
                         <div class="translio-panel translio-panel-translation">
                             <div class="translio-panel-header">
                                 <?php echo esc_html($languages[$secondary_language]['name']); ?>
-                                <?php if ($has_api_key) : ?>
+                                <?php if ($can_translate) : ?>
                                 <button type="button" class="button button-small translio-translate-term-field"
                                         data-field="description"
                                         data-text="<?php echo esc_attr($term->description); ?>">
