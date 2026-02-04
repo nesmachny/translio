@@ -540,7 +540,7 @@ class Translio_Admin_Ajax {
         $to_translate = array();
         foreach ($fields as $field => $value) {
             if (!empty($value)) {
-                $existing = Translio_DB::get_translation($post_id, 'post', $field, $secondary_language);
+                $existing = Translio_DB::get_translation($post_id, $post->post_type, $field, $secondary_language);
                 if (!$existing || empty($existing->translated_content)) {
                     $to_translate[$field] = $value;
                 }
@@ -562,7 +562,7 @@ class Translio_Admin_Ajax {
             if (!empty($translated) && isset($to_translate[$field])) {
                 Translio_DB::save_translation(
                     $post_id,
-                    'post',
+                    $post->post_type,
                     $field,
                     $secondary_language,
                     $to_translate[$field],
