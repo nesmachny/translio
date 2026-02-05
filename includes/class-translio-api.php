@@ -23,12 +23,14 @@ class Translio_API {
 
     /**
      * Get maximum content length before chunking (model-dependent)
-     * Haiku: 4096 max output tokens ≈ 12000 chars
-     * Sonnet: 8192 max output tokens ≈ 24000 chars
+     * Reduced to account for non-Latin target languages (Cyrillic, CJK, etc.)
+     * that use more tokens per character.
+     * Haiku: 4096 max output tokens → ~8000 chars safe limit
+     * Sonnet: 8192 max output tokens → ~14000 chars safe limit
      */
     private function get_max_content_length() {
         $model = (string) $this->model;
-        return (strpos($model, 'haiku') !== false) ? 12000 : 20000;
+        return (strpos($model, 'haiku') !== false) ? 8000 : 14000;
     }
 
     /**
@@ -291,7 +293,8 @@ class Translio_API {
                          "3. PRESERVE ALL HTML EXACTLY: tags, attributes, WordPress blocks (<!-- wp:... -->), shortcodes\n" .
                          "4. Only translate text content, never modify HTML markup\n" .
                          "5. Brand names and technical terms remain unchanged\n" .
-                         "6. Output valid JSON only, no markdown code blocks";
+                         "6. Output valid JSON only, no markdown code blocks\n" .
+                         "7. NEVER summarize, abbreviate, or skip any content. Translate EVERY text completely";
 
         // Add global context if provided
         if (!empty($global_context)) {
@@ -865,10 +868,53 @@ class Translio_API {
 
     private function extract_translation($response) {
         if (isset($response['content'][0]['text'])) {
-            return trim($response['content'][0]['text']);
+            $text = trim($response['content'][0]['text']);
+
+            // Check if response was truncated due to max_tokens
+            if (isset($response['stop_reason']) && $response['stop_reason'] === 'max_tokens') {
+                Translio_Logger::warning('Translation truncated (max_tokens reached). Content may be incomplete.', Translio_Logger::CAT_API);
+            }
+
+            // Detect lazy/summarized output patterns
+            if ($this->is_lazy_translation($text)) {
+                Translio_Logger::warning('Lazy translation detected - model summarized instead of translating fully', Translio_Logger::CAT_API);
+            }
+
+            return $text;
         }
 
         return new WP_Error('invalid_response', __('Invalid API response format', 'translio'));
+    }
+
+    /**
+     * Detect if translation contains lazy/summarized patterns
+     *
+     * @param string $text Translated text
+     * @return bool True if lazy patterns detected
+     */
+    private function is_lazy_translation($text) {
+        $lazy_patterns = array(
+            '[...',
+            '[…',
+            '... rest of',
+            '…rest of',
+            'remains translated',
+            'continues in the same',
+            'translated in the same manner',
+            'и так далее',
+            'остальная часть',
+            'продолжается аналогично',
+            'переведено аналогично',
+        );
+
+        $text_lower = mb_strtolower($text);
+        foreach ($lazy_patterns as $pattern) {
+            if (mb_strpos($text_lower, mb_strtolower($pattern)) !== false) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public function test_connection() {
@@ -974,7 +1020,8 @@ class Translio_API {
                          "3. Only translate text BETWEEN HTML tags, never modify the tags themselves\n" .
                          "4. Keep the same line breaks and whitespace structure\n" .
                          "5. Do NOT add explanations or notes\n" .
-                         "6. Brand names and technical terms (WordPress, Next.js, React, etc.) remain unchanged";
+                         "6. Brand names and technical terms (WordPress, Next.js, React, etc.) remain unchanged\n" .
+                         "7. NEVER summarize, abbreviate, or skip any content. Translate EVERY sentence and paragraph completely. Do NOT use placeholders like '[...]' or 'rest of the document'";
 
         if (!empty($context)) {
             $system_prompt .= " Context: {$context}";
@@ -990,6 +1037,21 @@ class Translio_API {
 
         if (is_wp_error($translation)) {
             return $translation;
+        }
+
+        // If lazy translation detected, retry once with stronger prompt
+        if ($this->is_lazy_translation($translation)) {
+            Translio_Logger::info('Retrying translation due to lazy output...', Translio_Logger::CAT_API);
+            $retry_prompt = $system_prompt . "\n\nWARNING: Your previous attempt was rejected because you summarized content instead of translating it. You MUST translate the COMPLETE text word by word. Do NOT skip or abbreviate ANY part.";
+            $response = $this->make_request($retry_prompt, $text);
+            if (!is_wp_error($response)) {
+                $retry_translation = $this->extract_translation($response);
+                if (!is_wp_error($retry_translation) && !$this->is_lazy_translation($retry_translation)) {
+                    return $this->cleanup_translation($retry_translation);
+                }
+            }
+            // If retry also failed, return original (imperfect but better than error)
+            Translio_Logger::warning('Retry also produced lazy translation, using original result', Translio_Logger::CAT_API);
         }
 
         // Clean up excessive escaping
