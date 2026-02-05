@@ -3,7 +3,7 @@
  * Plugin Name: Translio
  * Plugin URI: https://translio.to
  * Description: A lightweight WordPress translation plugin with Anthropic API integration for automatic translations.
- * Version: 2.3.10
+ * Version: 2.3.11
  * Author: Sergey Nesmachny
  * Author URI: https://nesmachny.net
  * License: GPL v2 or later
@@ -35,7 +35,7 @@ $translio_old_error_handler = set_error_handler(function($errno, $errstr, $errfi
 // DEBUG: Profile plugin load time
 define('TRANSLIO_START_TIME', microtime(true));
 
-define('TRANSLIO_VERSION', '2.3.10');
+define('TRANSLIO_VERSION', '2.3.11');
 define('TRANSLIO_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('TRANSLIO_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('TRANSLIO_PLUGIN_BASENAME', plugin_basename(__FILE__));

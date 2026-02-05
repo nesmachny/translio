@@ -5,6 +5,13 @@ All notable changes to Translio plugin will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.11] - 2026-02-05
+
+### Fixed
+- **Excessive Escaping in Translations**: Fixed issue where translations contained multiple backslashes before quotes (`\\\\\"` instead of `"`). Added `cleanup_translation()` method that normalizes excessive escaping from API responses.
+
+---
+
 ## [2.3.10] - 2026-02-04
 
 ### Fixed

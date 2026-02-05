@@ -366,6 +366,11 @@ class Translio_API {
             return $translations;
         }
 
+        // Clean up excessive escaping from API translations
+        foreach ($api_translations as $key => $value) {
+            $api_translations[$key] = $this->cleanup_translation($value);
+        }
+
         // Merge TM translations with API translations
         return array_merge($translations, $api_translations);
     }
@@ -981,7 +986,14 @@ class Translio_API {
             return $response;
         }
 
-        return $this->extract_translation($response);
+        $translation = $this->extract_translation($response);
+
+        if (is_wp_error($translation)) {
+            return $translation;
+        }
+
+        // Clean up excessive escaping
+        return $this->cleanup_translation($translation);
     }
 
     /**
@@ -1060,7 +1072,35 @@ class Translio_API {
         delete_transient('translio_credits_cache');
 
         Translio_Logger::log_api_call('translate_proxy', strlen($text), '', $duration, true);
-        return $data['translation'];
+
+        // Clean up excessive escaping from translation
+        return $this->cleanup_translation($data['translation']);
+    }
+
+    /**
+     * Clean up excessive escaping from translation text
+     *
+     * Sometimes translations contain multiple levels of escaped quotes (\\\\\" instead of ")
+     * This function normalizes them to proper quotes.
+     *
+     * @param string $text Translation text
+     * @return string Cleaned text
+     */
+    private function cleanup_translation($text) {
+        if (empty($text) || !is_string($text)) {
+            return $text;
+        }
+
+        // Replace multiple backslashes followed by quote with just a quote
+        // Pattern: 2+ backslashes before a quote -> single quote
+        $text = preg_replace('/\\\\{2,}"/', '"', $text);
+        $text = preg_replace("/\\\\{2,}'/", "'", $text);
+
+        // Also handle cases where there's still \\" or \'
+        $text = str_replace('\\"', '"', $text);
+        $text = str_replace("\\'", "'", $text);
+
+        return $text;
     }
 
     /**
@@ -1127,7 +1167,14 @@ class Translio_API {
         delete_transient('translio_credits_cache');
 
         Translio_Logger::log_api_call('translate_batch_proxy', count($texts), '', $duration, true);
-        return $data['translations'];
+
+        // Clean up excessive escaping from all translations
+        $translations = $data['translations'];
+        foreach ($translations as $key => $value) {
+            $translations[$key] = $this->cleanup_translation($value);
+        }
+
+        return $translations;
     }
 
     /**
