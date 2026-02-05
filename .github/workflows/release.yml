@@ -1,0 +1,65 @@
+name: Release Plugin
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get version from tag
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Create plugin ZIP
+        run: |
+          # Create ZIP excluding dev files
+          zip -r translio-${{ steps.get_version.outputs.VERSION }}.zip . \
+            -x "*.git*" \
+            -x "*.DS_Store" \
+            -x ".github/*" \
+            -x "node_modules/*" \
+            -x "*.md" \
+            -x ".claude/*"
+
+          # Also create translio.zip for easy download
+          cp translio-${{ steps.get_version.outputs.VERSION }}.zip translio.zip
+
+      - name: Extract changelog for this version
+        id: changelog
+        run: |
+          # Extract changelog section for this version
+          VERSION="${{ steps.get_version.outputs.VERSION }}"
+          CHANGELOG=$(sed -n "/## \[${VERSION}\]/,/## \[/p" CHANGELOG.md | sed '1d;$d' | head -20)
+          echo "CHANGELOG<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGELOG" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: Translio v${{ steps.get_version.outputs.VERSION }}
+          body: |
+            ## Translio v${{ steps.get_version.outputs.VERSION }}
+
+            ${{ steps.changelog.outputs.CHANGELOG }}
+
+            ### Installation
+            1. Download `translio.zip`
+            2. Go to WordPress Admin → Plugins → Add New → Upload Plugin
+            3. Upload the ZIP file and activate
+
+            Or update automatically via the plugin's "Check for updates" button.
+          files: |
+            translio-${{ steps.get_version.outputs.VERSION }}.zip
+            translio.zip
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
