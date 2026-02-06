@@ -290,11 +290,10 @@ class Translio_API {
                          "CRITICAL RULES:\n" .
                          "1. Return ONLY a valid JSON object: {\"id1\": \"translation1\", \"id2\": \"translation2\"}\n" .
                          "2. Use the exact same IDs provided in the input\n" .
-                         "3. PRESERVE ALL HTML EXACTLY: tags, attributes, WordPress blocks (<!-- wp:... -->), shortcodes\n" .
-                         "4. Only translate text content, never modify HTML markup\n" .
-                         "5. Brand names and technical terms remain unchanged\n" .
-                         "6. Output valid JSON only, no markdown code blocks\n" .
-                         "7. NEVER summarize, abbreviate, or skip any content. Translate EVERY text completely";
+                         "3. Keep ALL markers like [[T0]], [[T1]], etc. exactly as they appear - never translate, modify, or remove them\n" .
+                         "4. Brand names and technical terms remain unchanged\n" .
+                         "5. Output valid JSON only, no markdown code blocks\n" .
+                         "6. NEVER summarize, abbreviate, or skip any content. Translate EVERY text completely";
 
         // Add global context if provided
         if (!empty($global_context)) {
@@ -1001,12 +1000,36 @@ class Translio_API {
      * @return string|WP_Error Translated text or error
      */
     private function translate_text_direct($text, $target_language, $context = '') {
-        // Use proxy if in proxy mode
-        if ($this->use_proxy) {
-            return $this->translate_via_proxy($text, $target_language, $context);
+        // For classic editor content (no block-level HTML), apply wpautop
+        // to convert paragraph breaks into <p> tags before translation
+        $has_block_html = preg_match('/<(p|h[1-6]|div|ul|ol|li|blockquote|table|figure)[\s>]/i', $text);
+        $has_gutenberg = (strpos($text, '<!-- wp:') !== false);
+        if (!$has_block_html && !$has_gutenberg && strpos($text, "\n") !== false) {
+            $text = wpautop($text);
         }
 
-        // BYOAI mode - use direct Anthropic API
+        // Protect HTML tags by replacing with placeholders before translation
+        $tag_map = array();
+        $protected_text = $this->protect_html_tags($text, $tag_map);
+
+        if ($this->use_proxy) {
+            $result = $this->translate_via_proxy($protected_text, $target_language, $context);
+        } else {
+            $result = $this->translate_text_byoai($protected_text, $target_language, $context);
+        }
+
+        if (is_wp_error($result)) {
+            return $result;
+        }
+
+        // Restore HTML tags from placeholders
+        return $this->restore_html_tags($result, $tag_map);
+    }
+
+    /**
+     * BYOAI translation (direct Anthropic API)
+     */
+    private function translate_text_byoai($text, $target_language, $context = '') {
         $languages = Translio::get_available_languages();
         $source_lang = translio()->get_setting('default_language');
 
@@ -1016,12 +1039,11 @@ class Translio_API {
         $system_prompt = "You are a translation engine. Translate from {$source_name} to {$target_name}.\n\n" .
                          "CRITICAL RULES:\n" .
                          "1. Output ONLY the translated content, nothing else\n" .
-                         "2. PRESERVE ALL HTML EXACTLY: tags, attributes, WordPress blocks (<!-- wp:... -->), shortcodes [like this]\n" .
-                         "3. Only translate text BETWEEN HTML tags, never modify the tags themselves\n" .
-                         "4. Keep the same line breaks and whitespace structure\n" .
-                         "5. Do NOT add explanations or notes\n" .
-                         "6. Brand names and technical terms (WordPress, Next.js, React, etc.) remain unchanged\n" .
-                         "7. NEVER summarize, abbreviate, or skip any content. Translate EVERY sentence and paragraph completely. Do NOT use placeholders like '[...]' or 'rest of the document'";
+                         "2. Keep ALL markers like [[T0]], [[T1]], etc. exactly as they appear - never translate, modify, or remove them\n" .
+                         "3. Keep the same line breaks and whitespace structure\n" .
+                         "4. Do NOT add explanations or notes\n" .
+                         "5. Brand names and technical terms (WordPress, Next.js, React, etc.) remain unchanged\n" .
+                         "6. NEVER summarize, abbreviate, or skip any content. Translate EVERY sentence and paragraph completely";
 
         if (!empty($context)) {
             $system_prompt .= " Context: {$context}";
@@ -1050,12 +1072,49 @@ class Translio_API {
                     return $this->cleanup_translation($retry_translation);
                 }
             }
-            // If retry also failed, return original (imperfect but better than error)
             Translio_Logger::warning('Retry also produced lazy translation, using original result', Translio_Logger::CAT_API);
         }
 
-        // Clean up excessive escaping
         return $this->cleanup_translation($translation);
+    }
+
+    /**
+     * Replace HTML tags and comments with numbered placeholders
+     *
+     * @param string $text Text with HTML
+     * @param array &$tag_map Reference to array that will store tag mappings
+     * @return string Text with placeholders instead of HTML tags
+     */
+    private function protect_html_tags($text, &$tag_map) {
+        if (empty($text) || strpos($text, '<') === false) {
+            return $text;
+        }
+
+        $tag_map = array();
+        return preg_replace_callback('/<!--[\s\S]*?-->|<[^>]+>/u', function ($match) use (&$tag_map) {
+            $index = count($tag_map);
+            $tag_map[$index] = $match[0];
+            return '[[T' . $index . ']]';
+        }, $text);
+    }
+
+    /**
+     * Restore HTML tags from numbered placeholders
+     *
+     * @param string $text Translated text with placeholders
+     * @param array $tag_map Array of index => original tag
+     * @return string Text with HTML tags restored
+     */
+    private function restore_html_tags($text, $tag_map) {
+        if (empty($tag_map)) {
+            return $text;
+        }
+
+        foreach ($tag_map as $index => $tag) {
+            $text = str_replace('[[T' . $index . ']]', $tag, $text);
+        }
+
+        return $text;
     }
 
     /**
