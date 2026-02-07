@@ -79,6 +79,8 @@ class Translio_Admin_Strings {
         <div class="wrap translio-strings">
             <h1><?php esc_html_e('Theme & Plugin Strings', 'translio'); ?></h1>
 
+            <?php Translio_Admin::render_language_selector('translio-strings'); ?>
+
             <div class="translio-translate-header">
                 <div class="translio-lang-indicator">
                     <span class="translio-lang-badge">

@@ -5,6 +5,13 @@ All notable changes to Translio plugin will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.13] - 2026-02-07
+
+### Added
+- **Language Selector on All Admin Pages**: Added language tabs to all admin pages for multi-language setups. Previously only Content and Dashboard pages had the language selector; now Taxonomies, Media, Strings, Site Options, WooCommerce, CF7, Elementor, Divi, and Avada pages all show language tabs when multiple secondary languages are configured.
+
+---
+
 ## [2.3.11] - 2026-02-05
 
 ### Fixed

@@ -103,6 +103,8 @@ class Translio_Admin_Taxonomies {
         <div class="wrap">
             <h1><img src="<?php echo esc_url(TRANSLIO_PLUGIN_URL . 'admin/images/logo.png'); ?>" alt="Translio" class="translio-logo"> <?php esc_html_e('Taxonomies', 'translio'); ?></h1>
 
+            <?php Translio_Admin::render_language_selector('translio-taxonomies'); ?>
+
             <div class="translio-translate-header">
                 <div class="translio-lang-indicator">
                     <span class="translio-lang-badge">
@@ -393,6 +395,8 @@ class Translio_Admin_Taxonomies {
                 </a>
                 <?php esc_html_e('Translate Term:', 'translio'); ?> <?php echo esc_html($term->name); ?>
             </h1>
+
+            <?php Translio_Admin::render_language_selector('translio-translate-term'); ?>
 
             <div class="translio-translate-header">
                 <div class="translio-lang-indicator">

@@ -61,6 +61,8 @@ class Translio_Admin_Avada {
         <div class="wrap">
             <h1><img src="<?php echo esc_url(TRANSLIO_PLUGIN_URL . 'admin/images/logo.png'); ?>" alt="Translio" class="translio-logo"> <?php esc_html_e('Avada Pages', 'translio'); ?></h1>
 
+            <?php Translio_Admin::render_language_selector('translio-avada'); ?>
+
             <div class="translio-translate-header">
                 <div class="translio-lang-indicator">
                     <span class="translio-lang-badge">
@@ -204,6 +206,8 @@ class Translio_Admin_Avada {
                     ← <?php esc_html_e('Back to list', 'translio'); ?>
                 </a>
             </p>
+
+            <?php Translio_Admin::render_language_selector('translio-translate-avada'); ?>
 
             <div class="translio-translate-header">
                 <div class="translio-lang-indicator">

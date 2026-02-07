@@ -67,6 +67,8 @@ class Translio_Admin_WC {
         <div class="wrap translio-translate">
             <h1><img src="<?php echo esc_url(TRANSLIO_PLUGIN_URL . 'admin/images/logo.png'); ?>" alt="Translio" class="translio-logo"> <?php esc_html_e('WooCommerce Attributes', 'translio'); ?></h1>
 
+            <?php Translio_Admin::render_language_selector('translio-wc'); ?>
+
             <div class="translio-translate-header">
                 <div class="translio-lang-indicator">
                     <span class="translio-lang-badge">

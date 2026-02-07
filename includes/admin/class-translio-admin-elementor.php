@@ -70,6 +70,8 @@ class Translio_Admin_Elementor {
         <div class="wrap">
             <h1><img src="<?php echo esc_url(TRANSLIO_PLUGIN_URL . 'admin/images/logo.png'); ?>" alt="Translio" class="translio-logo"> <?php esc_html_e('Elementor Pages', 'translio'); ?></h1>
 
+            <?php Translio_Admin::render_language_selector('translio-elementor'); ?>
+
             <div class="translio-translate-header">
                 <div class="translio-lang-indicator">
                     <span class="translio-lang-badge">
@@ -230,6 +232,8 @@ class Translio_Admin_Elementor {
                 </a>
                 <?php esc_html_e('Translate Elementor:', 'translio'); ?> <?php echo esc_html($post->post_title); ?>
             </h1>
+
+            <?php Translio_Admin::render_language_selector('translio-translate-elementor'); ?>
 
             <div class="translio-translate-header">
                 <div class="translio-lang-indicator">

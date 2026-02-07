@@ -65,6 +65,8 @@ class Translio_Admin_CF7 {
         <div class="wrap">
             <h1><img src="<?php echo esc_url(TRANSLIO_PLUGIN_URL . 'admin/images/logo.png'); ?>" alt="Translio" class="translio-logo"> <?php esc_html_e('Contact Form 7', 'translio'); ?></h1>
 
+            <?php Translio_Admin::render_language_selector('translio-cf7'); ?>
+
             <div class="translio-translate-header">
                 <div class="translio-lang-indicator">
                     <span class="translio-lang-badge">
@@ -275,6 +277,8 @@ class Translio_Admin_CF7 {
                 </a>
                 <?php esc_html_e('Translate Form:', 'translio'); ?> <?php echo esc_html($form->post_title); ?>
             </h1>
+
+            <?php Translio_Admin::render_language_selector('translio-translate-cf7'); ?>
 
             <div class="translio-translate-header">
                 <div class="translio-lang-indicator">
