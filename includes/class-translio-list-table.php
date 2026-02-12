@@ -295,8 +295,9 @@ class Translio_List_Table extends WP_List_Table {
 
     public function column_title($item) {
         $edit_url = admin_url(sprintf(
-            'admin.php?page=translio-translate&post_id=%d&object_type=post',
-            $item['ID']
+            'admin.php?page=translio-translate&post_id=%d&object_type=%s',
+            $item['ID'],
+            $item['type']
         ));
 
         $actions = array(

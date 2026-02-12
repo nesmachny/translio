@@ -395,7 +395,7 @@ class Translio_DB {
 
         $query = "SELECT p.ID, p.post_title, p.post_type
                   FROM {$wpdb->posts} p
-                  LEFT JOIN {$table} t ON p.ID = t.object_id AND t.object_type = 'post' AND t.language_code = %s
+                  LEFT JOIN {$table} t ON p.ID = t.object_id AND t.object_type = p.post_type AND t.language_code = %s
                   WHERE (p.post_status = 'publish' OR (p.post_type IN ('wp_navigation', 'wp_template_part', 'wp_block') AND p.post_status IN ('publish', 'draft')))
                   AND p.post_type IN ({$post_types_placeholder})
                   AND t.id IS NULL
@@ -418,7 +418,7 @@ class Translio_DB {
 
         $query = "SELECT COUNT(*)
                   FROM {$wpdb->posts} p
-                  LEFT JOIN {$table} t ON p.ID = t.object_id AND t.object_type = 'post' AND t.language_code = %s
+                  LEFT JOIN {$table} t ON p.ID = t.object_id AND t.object_type = p.post_type AND t.language_code = %s
                   WHERE (p.post_status = 'publish' OR (p.post_type IN ('wp_navigation', 'wp_template_part', 'wp_block') AND p.post_status IN ('publish', 'draft')))
                   AND p.post_type IN ({$post_types_placeholder})
                   AND t.id IS NULL";
@@ -440,7 +440,7 @@ class Translio_DB {
 
         $query = "SELECT p.ID, p.post_title, p.post_type, t.original_hash, MD5(p.post_content) as current_hash
                   FROM {$wpdb->posts} p
-                  INNER JOIN {$table} t ON p.ID = t.object_id AND t.object_type = 'post' AND t.field_name = 'content' AND t.language_code = %s
+                  INNER JOIN {$table} t ON p.ID = t.object_id AND t.object_type = p.post_type AND t.field_name = 'content' AND t.language_code = %s
                   WHERE (p.post_status = 'publish' OR (p.post_type IN ('wp_navigation', 'wp_template_part', 'wp_block') AND p.post_status IN ('publish', 'draft')))
                   AND p.post_type IN ({$post_types_placeholder})
                   AND t.original_hash != MD5(p.post_content)
@@ -463,7 +463,7 @@ class Translio_DB {
 
         $query = "SELECT COUNT(*)
                   FROM {$wpdb->posts} p
-                  INNER JOIN {$table} t ON p.ID = t.object_id AND t.object_type = 'post' AND t.field_name = 'content' AND t.language_code = %s
+                  INNER JOIN {$table} t ON p.ID = t.object_id AND t.object_type = p.post_type AND t.field_name = 'content' AND t.language_code = %s
                   WHERE (p.post_status = 'publish' OR (p.post_type IN ('wp_navigation', 'wp_template_part', 'wp_block') AND p.post_status IN ('publish', 'draft')))
                   AND p.post_type IN ({$post_types_placeholder})
                   AND t.original_hash != MD5(p.post_content)";
@@ -485,8 +485,10 @@ class Translio_DB {
                         AND post_type IN ({$post_types_placeholder})";
         $total = $wpdb->get_var($wpdb->prepare($total_query, $post_types));
 
-        $translated_query = "SELECT COUNT(DISTINCT object_id) FROM {$table} WHERE language_code = %s AND object_type = 'post'";
-        $translated = $wpdb->get_var($wpdb->prepare($translated_query, $language_code));
+        $translated_query = "SELECT COUNT(DISTINCT t.object_id) FROM {$table} t
+                             INNER JOIN {$wpdb->posts} p ON t.object_id = p.ID AND t.object_type = p.post_type
+                             WHERE t.language_code = %s AND p.post_type IN ({$post_types_placeholder})";
+        $translated = $wpdb->get_var($wpdb->prepare($translated_query, array_merge(array($language_code), $post_types)));
 
         return array(
             'total' => (int) $total,

@@ -5,6 +5,15 @@ All notable changes to Translio plugin will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.14] - 2026-02-12
+
+### Fixed
+- **Custom Post Type translations invisible**: Fixed 6 SQL queries that hardcoded `object_type = 'post'` instead of using `p.post_type`, causing CPT translations to be saved correctly but never found when reading. Affected: untranslated post lists, untranslated counts, needs-update detection, translation stats, and REST API bulk responses.
+- **List table URL**: Fixed hardcoded `object_type=post` in translate link URL to use actual post type.
+- **Editor data attribute**: Fixed hardcoded `data-object-type="post"` to use `$post->post_type`.
+
+---
+
 ## [2.3.13] - 2026-02-07
 
 ### Added

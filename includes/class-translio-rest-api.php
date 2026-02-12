@@ -584,8 +584,9 @@ class Translio_REST_API {
 
         $placeholders = implode(',', array_fill(0, count($object_ids), '%d'));
         $query = $wpdb->prepare(
-            "SELECT object_id, field_name, translated_content FROM {$table}
-             WHERE object_id IN ({$placeholders}) AND object_type = 'post' AND language_code = %s",
+            "SELECT t.object_id, t.field_name, t.translated_content FROM {$table} t
+             INNER JOIN {$wpdb->posts} p ON t.object_id = p.ID AND t.object_type = p.post_type
+             WHERE t.object_id IN ({$placeholders}) AND t.language_code = %s",
             array_merge($object_ids, array($lang))
         );
 

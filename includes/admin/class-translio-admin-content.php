@@ -221,7 +221,7 @@ class Translio_Admin_Content {
                 <?php endif; ?>
             </div>
 
-            <div class="translio-editor" data-post-id="<?php echo esc_attr($post_id); ?>" data-object-type="post">
+            <div class="translio-editor" data-post-id="<?php echo esc_attr($post_id); ?>" data-object-type="<?php echo esc_attr($post->post_type); ?>">
                 <?php foreach ($translatable_fields as $field_name => $field) :
                     $translation = isset($translations_by_field[$field_name]) ? $translations_by_field[$field_name] : null;
                     $translated_value = $translation ? $translation->translated_content : '';
