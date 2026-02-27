@@ -235,6 +235,12 @@ class Translio_API {
             if (is_wp_error($result)) {
                 return $result;
             }
+            // Restore HTML tags if they were protected
+            if (isset($batch_tag_maps[$item['id']])) {
+                $result = $this->restore_html_tags($result, $batch_tag_maps[$item['id']]);
+            }
+            // Strip any leftover markers that AI may have hallucinated
+            $result = preg_replace('/\[\[T\d+\]\]/', '', $result);
             $translations[$item['id']] = $result;
             return $translations;
         }
@@ -285,13 +291,28 @@ class Translio_API {
         $source_name = isset($languages[$source_lang]) ? $languages[$source_lang]['name'] : $source_lang;
         $target_name = isset($languages[$target_language]) ? $languages[$target_language]['name'] : $target_language;
 
+        // Protect HTML tags in each text before sending to API
+        $batch_tag_maps = array();
+        $has_markers = false;
+        foreach ($texts_to_translate as &$item) {
+            $tag_map = array();
+            $item['text'] = $this->protect_html_tags($item['text'], $tag_map);
+            if (!empty($tag_map)) {
+                $batch_tag_maps[$item['id']] = $tag_map;
+                $has_markers = true;
+            }
+        }
+        unset($item);
+
         // Build batch prompt with context hints if available
         $system_prompt = "You are a translation engine. Translate multiple texts from {$source_name} to {$target_name}.\n" .
                          "CRITICAL RULES:\n" .
                          "1. Return ONLY a valid JSON object: {\"id1\": \"translation1\", \"id2\": \"translation2\"}\n" .
-                         "2. Use the exact same IDs provided in the input\n" .
-                         "3. Keep ALL markers like [[T0]], [[T1]], etc. exactly as they appear - never translate, modify, or remove them\n" .
-                         "4. Brand names and technical terms remain unchanged\n" .
+                         "2. Use the exact same IDs provided in the input\n";
+        if ($has_markers) {
+            $system_prompt .= "3. Keep ALL markers like [[T0]], [[T1]], etc. exactly as they appear - never translate, modify, or remove them\n";
+        }
+        $system_prompt .= "4. Brand names and technical terms remain unchanged\n" .
                          "5. Output valid JSON only, no markdown code blocks\n" .
                          "6. NEVER summarize, abbreviate, or skip any content. Translate EVERY text completely";
 
@@ -368,9 +389,16 @@ class Translio_API {
             return $translations;
         }
 
-        // Clean up excessive escaping from API translations
+        // Clean up excessive escaping and restore HTML tags from API translations
         foreach ($api_translations as $key => $value) {
-            $api_translations[$key] = $this->cleanup_translation($value);
+            $value = $this->cleanup_translation($value);
+            // Restore HTML tags from placeholders
+            if (isset($batch_tag_maps[$key])) {
+                $value = $this->restore_html_tags($value, $batch_tag_maps[$key]);
+            }
+            // Strip any leftover markers that AI may have hallucinated
+            $value = preg_replace('/\[\[T\d+\]\]/', '', $value);
+            $api_translations[$key] = $value;
         }
 
         // Merge TM translations with API translations
@@ -1023,7 +1051,10 @@ class Translio_API {
         }
 
         // Restore HTML tags from placeholders
-        return $this->restore_html_tags($result, $tag_map);
+        $result = $this->restore_html_tags($result, $tag_map);
+        // Strip any leftover markers that AI may have hallucinated
+        $result = preg_replace('/\[\[T\d+\]\]/', '', $result);
+        return $result;
     }
 
     /**
@@ -1289,10 +1320,12 @@ class Translio_API {
 
         Translio_Logger::log_api_call('translate_batch_proxy', count($texts), '', $duration, true);
 
-        // Clean up excessive escaping from all translations
+        // Clean up excessive escaping and strip leftover markers from all translations
         $translations = $data['translations'];
         foreach ($translations as $key => $value) {
-            $translations[$key] = $this->cleanup_translation($value);
+            $value = $this->cleanup_translation($value);
+            $value = preg_replace('/\[\[T\d+\]\]/', '', $value);
+            $translations[$key] = $value;
         }
 
         return $translations;
