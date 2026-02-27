@@ -37,6 +37,10 @@ class Translio_Admin {
 
         // AJAX handler for feedback
         add_action('wp_ajax_translio_send_feedback', array($this, 'ajax_send_feedback'));
+
+        // Add "Translate" link to post/page row actions
+        add_filter('post_row_actions', array($this, 'add_translate_row_action'), 10, 2);
+        add_filter('page_row_actions', array($this, 'add_translate_row_action'), 10, 2);
     }
 
     /**
@@ -712,6 +716,35 @@ class Translio_Admin {
             </div>
         </div>
         <?php
+    }
+
+    /**
+     * Add "Translate" link to post/page row actions
+     */
+    public function add_translate_row_action($actions, $post) {
+        if (!current_user_can('edit_post', $post->ID)) {
+            return $actions;
+        }
+
+        // Only for public post types that Translio handles
+        $post_type_obj = get_post_type_object($post->post_type);
+        if (!$post_type_obj || !$post_type_obj->public) {
+            return $actions;
+        }
+
+        $url = admin_url(sprintf(
+            'admin.php?page=translio-translate&post_id=%d&object_type=%s',
+            $post->ID,
+            $post->post_type
+        ));
+
+        $actions['translio_translate'] = sprintf(
+            '<a href="%s">%s</a>',
+            esc_url($url),
+            esc_html__('Translate', 'translio')
+        );
+
+        return $actions;
     }
 
     /**
