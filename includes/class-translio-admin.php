@@ -41,6 +41,9 @@ class Translio_Admin {
         // Add "Translate" link to post/page row actions
         add_filter('post_row_actions', array($this, 'add_translate_row_action'), 10, 2);
         add_filter('page_row_actions', array($this, 'add_translate_row_action'), 10, 2);
+
+        // Add translation status column to post/page lists
+        add_action('admin_init', array($this, 'register_translation_columns'));
     }
 
     /**
@@ -305,6 +308,16 @@ class Translio_Admin {
      * Enqueue admin scripts and styles
      */
     public function enqueue_scripts($hook) {
+        // Load column styles on post list screens
+        if ($hook === 'edit.php') {
+            wp_enqueue_style(
+                'translio-admin',
+                TRANSLIO_PLUGIN_URL . 'admin/css/admin-style.css',
+                array(),
+                TRANSLIO_VERSION
+            );
+        }
+
         if (empty($hook) || strpos($hook, 'translio') === false) {
             return;
         }
@@ -745,6 +758,80 @@ class Translio_Admin {
         );
 
         return $actions;
+    }
+
+    /**
+     * Register translation status columns for all public post types
+     */
+    public function register_translation_columns() {
+        $post_types = get_post_types(array('public' => true), 'names');
+
+        foreach ($post_types as $post_type) {
+            add_filter("manage_{$post_type}_posts_columns", array($this, 'add_translation_column'));
+            add_action("manage_{$post_type}_posts_custom_column", array($this, 'render_translation_column'), 10, 2);
+        }
+    }
+
+    /**
+     * Add translation status column header
+     */
+    public function add_translation_column($columns) {
+        $columns['translio_status'] = __('Translation', 'translio');
+        return $columns;
+    }
+
+    /**
+     * Render translation status column content
+     */
+    public function render_translation_column($column, $post_id) {
+        if ($column !== 'translio_status') {
+            return;
+        }
+
+        $post = get_post($post_id);
+        $default_language = translio()->get_setting('default_language');
+        $secondary_languages = translio()->get_secondary_languages();
+
+        if (empty($secondary_languages) || empty($default_language)) {
+            echo '—';
+            return;
+        }
+
+        $languages = Translio::get_available_languages();
+
+        echo '<div class="translio-column-status">';
+
+        foreach ($secondary_languages as $lang_code) {
+            $translation = Translio_DB::get_translation($post_id, $post->post_type, 'title', $lang_code);
+            $is_translated = $translation && !empty($translation->translated_content);
+
+            $translate_url = admin_url(sprintf(
+                'admin.php?page=translio-translate&post_id=%d&object_type=%s&translio_lang=%s',
+                $post_id,
+                $post->post_type,
+                $lang_code
+            ));
+
+            $lang_name = isset($languages[$lang_code]) ? $languages[$lang_code]['name'] : $lang_code;
+
+            if ($is_translated) {
+                echo sprintf(
+                    '<a href="%s" title="%s" class="translio-col-badge translio-col-translated">%s</a> ',
+                    esc_url($translate_url),
+                    esc_attr($lang_name . ': ' . __('Translated', 'translio')),
+                    esc_html(strtoupper($lang_code))
+                );
+            } else {
+                echo sprintf(
+                    '<a href="%s" title="%s" class="translio-col-badge translio-col-untranslated">%s</a> ',
+                    esc_url($translate_url),
+                    esc_attr($lang_name . ': ' . __('Not translated', 'translio')),
+                    esc_html(strtoupper($lang_code))
+                );
+            }
+        }
+
+        echo '</div>';
     }
 
     /**

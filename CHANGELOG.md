@@ -5,6 +5,13 @@ All notable changes to Translio plugin will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.17] - 2026-02-27
+
+### Added
+- **Translation status column in post lists**: Added "Translation" column to all public post type list tables (Posts, Pages, Products, CPTs) showing colored language badges per configured secondary language. Green = translated, gray = not translated. Clicking a badge navigates directly to the translate page for that language.
+
+---
+
 ## [2.3.16] - 2026-02-27
 
 ### Added

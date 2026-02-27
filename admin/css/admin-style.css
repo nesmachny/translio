@@ -1682,3 +1682,44 @@
 #translio-feedback-modal .translio-modal-close:hover {
     color: #1d2327;
 }
+
+/* Translation status column in post lists */
+.column-translio_status {
+    width: 120px;
+}
+
+.translio-column-status {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+}
+
+.translio-col-badge {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.4;
+    text-decoration: none;
+}
+
+.translio-col-translated {
+    background: #d4edda;
+    color: #155724;
+}
+
+.translio-col-translated:hover {
+    background: #c3e6cb;
+    color: #155724;
+}
+
+.translio-col-untranslated {
+    background: #e9ecef;
+    color: #6c757d;
+}
+
+.translio-col-untranslated:hover {
+    background: #dee2e6;
+    color: #495057;
+}
