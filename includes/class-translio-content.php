@@ -542,7 +542,10 @@ class Translio_Content {
 
         if ($translation && !empty($translation->translated_content)) {
             Translio_Logger::log_translation_path($post_type, $post_id, 'title', $this->get_translation_language(), 'db');
-            return $translation->translated_content;
+            $content = $translation->translated_content;
+            // Strip any leftover translation markers [[T0]], [[T1]], etc.
+            $content = preg_replace("/\[\[T[0-9]+\]\]/", "", $content);
+            return $content;
         }
 
         return $title;
@@ -632,7 +635,10 @@ class Translio_Content {
 
         if ($translation && !empty($translation->translated_content)) {
             Translio_Logger::log_translation_path($post_type, $post->ID, 'content', $this->get_translation_language(), 'db');
-            return $translation->translated_content;
+            $content = $translation->translated_content;
+            // Strip any leftover translation markers [[T0]], [[T1]], etc.
+            $content = preg_replace("/\[\[T[0-9]+\]\]/", "", $content);
+            return $content;
         }
 
         // Apply Divi field-level translations if Divi content detected
@@ -663,7 +669,10 @@ class Translio_Content {
         $translation = Translio_DB::get_translation($post->ID, $post->post_type, 'excerpt', $this->get_translation_language());
 
         if ($translation && !empty($translation->translated_content)) {
-            return $translation->translated_content;
+            $content = $translation->translated_content;
+            // Strip any leftover translation markers [[T0]], [[T1]], etc.
+            $content = preg_replace("/\[\[T[0-9]+\]\]/", "", $content);
+            return $content;
         }
 
         return $excerpt;
@@ -678,7 +687,10 @@ class Translio_Content {
         $translation = Translio_DB::get_translation($post->ID, $post->post_type, 'excerpt', $this->get_translation_language());
 
         if ($translation && !empty($translation->translated_content)) {
-            return $translation->translated_content;
+            $content = $translation->translated_content;
+            // Strip any leftover translation markers [[T0]], [[T1]], etc.
+            $content = preg_replace("/\[\[T[0-9]+\]\]/", "", $content);
+            return $content;
         }
 
         return $excerpt;
@@ -701,7 +713,10 @@ class Translio_Content {
         $translation = Translio_DB::get_translation($post->ID, $post->post_type, 'title', $this->get_translation_language());
 
         if ($translation && !empty($translation->translated_content)) {
-            return $translation->translated_content;
+            $content = $translation->translated_content;
+            // Strip any leftover translation markers [[T0]], [[T1]], etc.
+            $content = preg_replace("/\[\[T[0-9]+\]\]/", "", $content);
+            return $content;
         }
 
         return $title;
@@ -722,7 +737,10 @@ class Translio_Content {
         $translation = Translio_DB::get_translation($post->ID, $post->post_type, 'title', $this->get_translation_language());
 
         if ($translation && !empty($translation->translated_content)) {
-            return $translation->translated_content;
+            $content = $translation->translated_content;
+            // Strip any leftover translation markers [[T0]], [[T1]], etc.
+            $content = preg_replace("/\[\[T[0-9]+\]\]/", "", $content);
+            return $content;
         }
 
         return $title;
@@ -799,14 +817,20 @@ class Translio_Content {
             $translation = Translio_DB::get_translation($post->ID, $post_type, 'seo_title', $this->get_translation_language());
 
             if ($translation && !empty($translation->translated_content)) {
-                return $translation->translated_content;
+                $content = $translation->translated_content;
+            // Strip any leftover translation markers [[T0]], [[T1]], etc.
+            $content = preg_replace("/\[\[T[0-9]+\]\]/", "", $content);
+            return $content;
             }
 
             // Fallback to regular title
             $translation = Translio_DB::get_translation($post->ID, $post_type, 'title', $this->get_translation_language());
 
             if ($translation && !empty($translation->translated_content)) {
-                return $translation->translated_content;
+                $content = $translation->translated_content;
+            // Strip any leftover translation markers [[T0]], [[T1]], etc.
+            $content = preg_replace("/\[\[T[0-9]+\]\]/", "", $content);
+            return $content;
             }
         }
 
@@ -831,14 +855,20 @@ class Translio_Content {
             $translation = Translio_DB::get_translation($post->ID, $post_type, 'seo_description', $this->get_translation_language());
 
             if ($translation && !empty($translation->translated_content)) {
-                return $translation->translated_content;
+                $content = $translation->translated_content;
+            // Strip any leftover translation markers [[T0]], [[T1]], etc.
+            $content = preg_replace("/\[\[T[0-9]+\]\]/", "", $content);
+            return $content;
             }
 
             // Fallback to excerpt
             $translation = Translio_DB::get_translation($post->ID, $post_type, 'excerpt', $this->get_translation_language());
 
             if ($translation && !empty($translation->translated_content)) {
-                return $translation->translated_content;
+                $content = $translation->translated_content;
+            // Strip any leftover translation markers [[T0]], [[T1]], etc.
+            $content = preg_replace("/\[\[T[0-9]+\]\]/", "", $content);
+            return $content;
             }
         }
 
@@ -860,7 +890,10 @@ class Translio_Content {
         $translation = Translio_DB::get_translation($term->term_id, 'term', 'name', $this->get_translation_language());
 
         if ($translation && !empty($translation->translated_content)) {
-            return $translation->translated_content;
+            $content = $translation->translated_content;
+            // Strip any leftover translation markers [[T0]], [[T1]], etc.
+            $content = preg_replace("/\[\[T[0-9]+\]\]/", "", $content);
+            return $content;
         }
 
         return $title;
@@ -875,7 +908,10 @@ class Translio_Content {
         $translation = Translio_DB::get_translation($term_id, 'term', 'name', $this->get_translation_language());
 
         if ($translation && !empty($translation->translated_content)) {
-            return $translation->translated_content;
+            $content = $translation->translated_content;
+            // Strip any leftover translation markers [[T0]], [[T1]], etc.
+            $content = preg_replace("/\[\[T[0-9]+\]\]/", "", $content);
+            return $content;
         }
 
         return $name;
@@ -955,7 +991,10 @@ class Translio_Content {
         $translation = Translio_DB::get_translation($post_id, 'attachment', 'caption', $this->get_translation_language());
 
         if ($translation && !empty($translation->translated_content)) {
-            return $translation->translated_content;
+            $content = $translation->translated_content;
+            // Strip any leftover translation markers [[T0]], [[T1]], etc.
+            $content = preg_replace("/\[\[T[0-9]+\]\]/", "", $content);
+            return $content;
         }
 
         return $caption;
@@ -978,7 +1017,10 @@ class Translio_Content {
         $translation = Translio_DB::get_translation($post_id, 'attachment', 'title', $this->get_translation_language());
 
         if ($translation && !empty($translation->translated_content)) {
-            return $translation->translated_content;
+            $content = $translation->translated_content;
+            // Strip any leftover translation markers [[T0]], [[T1]], etc.
+            $content = preg_replace("/\[\[T[0-9]+\]\]/", "", $content);
+            return $content;
         }
 
         return $title;
@@ -1006,7 +1048,10 @@ class Translio_Content {
         $translation = Translio_DB::get_translation($post_id, 'attachment', 'description', $this->get_translation_language());
 
         if ($translation && !empty($translation->translated_content)) {
-            return $translation->translated_content;
+            $content = $translation->translated_content;
+            // Strip any leftover translation markers [[T0]], [[T1]], etc.
+            $content = preg_replace("/\[\[T[0-9]+\]\]/", "", $content);
+            return $content;
         }
 
         return $content;
@@ -1081,7 +1126,10 @@ class Translio_Content {
         if ($attribute_id) {
             $translation = Translio_DB::get_translation($attribute_id, 'wc_attribute', 'label', $this->get_translation_language());
             if ($translation && !empty($translation->translated_content)) {
-                return $translation->translated_content;
+                $content = $translation->translated_content;
+            // Strip any leftover translation markers [[T0]], [[T1]], etc.
+            $content = preg_replace("/\[\[T[0-9]+\]\]/", "", $content);
+            return $content;
             }
         }
 
@@ -1099,7 +1147,10 @@ class Translio_Content {
 
         $translation = Translio_DB::get_translation(1, 'option', 'blogname', $this->get_translation_language());
         if ($translation && !empty($translation->translated_content)) {
-            return $translation->translated_content;
+            $content = $translation->translated_content;
+            // Strip any leftover translation markers [[T0]], [[T1]], etc.
+            $content = preg_replace("/\[\[T[0-9]+\]\]/", "", $content);
+            return $content;
         }
 
         return $value;
@@ -1116,7 +1167,10 @@ class Translio_Content {
 
         $translation = Translio_DB::get_translation(1, 'option', 'blogdescription', $this->get_translation_language());
         if ($translation && !empty($translation->translated_content)) {
-            return $translation->translated_content;
+            $content = $translation->translated_content;
+            // Strip any leftover translation markers [[T0]], [[T1]], etc.
+            $content = preg_replace("/\[\[T[0-9]+\]\]/", "", $content);
+            return $content;
         }
 
         return $value;
@@ -1188,7 +1242,10 @@ class Translio_Content {
         $translation = Translio_DB::get_translation($widget_hash, 'widget', 'title', $this->get_translation_language());
 
         if ($translation && !empty($translation->translated_content)) {
-            return $translation->translated_content;
+            $content = $translation->translated_content;
+            // Strip any leftover translation markers [[T0]], [[T1]], etc.
+            $content = preg_replace("/\[\[T[0-9]+\]\]/", "", $content);
+            return $content;
         }
 
         return $title;
@@ -1209,7 +1266,10 @@ class Translio_Content {
         $translation = Translio_DB::get_translation($widget_hash, 'widget', 'content', $this->get_translation_language());
 
         if ($translation && !empty($translation->translated_content)) {
-            return $translation->translated_content;
+            $content = $translation->translated_content;
+            // Strip any leftover translation markers [[T0]], [[T1]], etc.
+            $content = preg_replace("/\[\[T[0-9]+\]\]/", "", $content);
+            return $content;
         }
 
         return $text;
@@ -1230,7 +1290,10 @@ class Translio_Content {
         $translation = Translio_DB::get_translation($widget_hash, 'widget', 'html', $this->get_translation_language());
 
         if ($translation && !empty($translation->translated_content)) {
-            return $translation->translated_content;
+            $content = $translation->translated_content;
+            // Strip any leftover translation markers [[T0]], [[T1]], etc.
+            $content = preg_replace("/\[\[T[0-9]+\]\]/", "", $content);
+            return $content;
         }
 
         return $content;
@@ -1417,7 +1480,10 @@ class Translio_Content {
         $translation = Translio_DB::get_translation($object_id, 'string', 'text', $this->get_translation_language());
 
         if ($translation && !empty($translation->translated_content)) {
-            return $translation->translated_content;
+            $content = $translation->translated_content;
+            // Strip any leftover translation markers [[T0]], [[T1]], etc.
+            $content = preg_replace("/\[\[T[0-9]+\]\]/", "", $content);
+            return $content;
         }
 
         return $translated;
@@ -1461,7 +1527,10 @@ class Translio_Content {
         $translation = Translio_DB::get_translation($object_id, 'string', 'text', $this->get_translation_language());
 
         if ($translation && !empty($translation->translated_content)) {
-            return $translation->translated_content;
+            $content = $translation->translated_content;
+            // Strip any leftover translation markers [[T0]], [[T1]], etc.
+            $content = preg_replace("/\[\[T[0-9]+\]\]/", "", $content);
+            return $content;
         }
 
         // Fallback: try without context
@@ -1469,7 +1538,10 @@ class Translio_Content {
         $translation = Translio_DB::get_translation($object_id_no_context, 'string', 'text', $this->get_translation_language());
 
         if ($translation && !empty($translation->translated_content)) {
-            return $translation->translated_content;
+            $content = $translation->translated_content;
+            // Strip any leftover translation markers [[T0]], [[T1]], etc.
+            $content = preg_replace("/\[\[T[0-9]+\]\]/", "", $content);
+            return $content;
         }
 
         return $translated;
@@ -1595,7 +1667,10 @@ class Translio_Content {
         $translation = Translio_DB::get_translation($post_id, $post_type, $field, $language_code);
 
         if ($translation && !empty($translation->translated_content)) {
-            return $translation->translated_content;
+            $content = $translation->translated_content;
+            // Strip any leftover translation markers [[T0]], [[T1]], etc.
+            $content = preg_replace("/\[\[T[0-9]+\]\]/", "", $content);
+            return $content;
         }
 
         $post = get_post($post_id);

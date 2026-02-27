@@ -5,6 +5,14 @@ All notable changes to Translio plugin will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.15] - 2026-02-27
+
+### Fixed
+- **[[T]] markers leaking into translations**: Fixed batch translation path missing `protect_html_tags()` call, causing AI to see raw HTML instead of placeholders. Conditional marker instruction in AI prompt — only mention `[[T]]` markers when they actually exist in text, preventing AI from hallucinating markers in plain-text fields (titles, excerpts).
+- **Safety net for marker cleanup**: Added `preg_replace` strip of leftover `[[T0]]` markers at all content output points (titles, content, excerpts, SEO fields, terms, attachments, widgets, strings, options) as a defense-in-depth measure.
+
+---
+
 ## [2.3.14] - 2026-02-12
 
 ### Fixed
