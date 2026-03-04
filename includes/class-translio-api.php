@@ -18,7 +18,7 @@ class Translio_API {
     private $api_key;
     private $api_url = 'https://api.anthropic.com/v1/messages';
     private $proxy_url = 'https://api.translio.to/wp-json/translio/v1';
-    private $model = 'claude-3-haiku-20240307';
+    private $model = 'claude-haiku-4-5-20251001';
     private $use_proxy = false;
 
     /**

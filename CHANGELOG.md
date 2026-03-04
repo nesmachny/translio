@@ -5,6 +5,13 @@ All notable changes to Translio plugin will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.18] - 2026-03-04
+
+### Fixed
+- **Update AI model**: Replaced deprecated `claude-3-haiku-20240307` with `claude-haiku-4-5-20251001` for BYOAI users. The old Claude 3 Haiku model was retired by Anthropic on Feb 19, 2026. Proxy server model also updated.
+
+---
+
 ## [2.3.17] - 2026-02-27
 
 ### Added
