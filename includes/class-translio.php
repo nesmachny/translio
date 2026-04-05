@@ -292,6 +292,10 @@ class Translio {
             'th' => array('name' => 'Thai', 'native' => 'ไทย'),
             'id' => array('name' => 'Indonesian', 'native' => 'Bahasa Indonesia'),
             'he' => array('name' => 'Hebrew', 'native' => 'עברית'),
+            'kk' => array('name' => 'Kazakh', 'native' => 'Қазақша'),
+            'uz' => array('name' => 'Uzbek', 'native' => 'Oʻzbekcha'),
+            'az' => array('name' => 'Azerbaijani', 'native' => 'Azərbaycanca'),
+            'ky' => array('name' => 'Kyrgyz', 'native' => 'Кыргызча'),
         );
     }
 }
