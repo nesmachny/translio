@@ -129,7 +129,7 @@ class Translio {
     /**
      * Get all secondary (translation) languages
      *
-     * @return array Array of language codes (max 4)
+     * @return array Array of language codes (max 10)
      */
     public function get_secondary_languages() {
         $languages = get_option('translio_secondary_languages', array());
@@ -144,8 +144,8 @@ class Translio {
             }
         }
 
-        // Limit to maximum 4 languages
-        return array_slice($languages, 0, 4);
+        // Limit to maximum 10 languages
+        return array_slice($languages, 0, 10);
     }
 
     /**

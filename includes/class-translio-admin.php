@@ -462,7 +462,7 @@ class Translio_Admin {
      * Sanitize secondary languages array
      *
      * @param mixed $languages Input value (should be array)
-     * @return array Sanitized array of language codes (max 4)
+     * @return array Sanitized array of language codes (max 10)
      */
     public function sanitize_secondary_languages($languages) {
         if (!is_array($languages)) {
@@ -472,14 +472,14 @@ class Translio_Admin {
         $available = array_keys(Translio::get_available_languages());
         $default = get_option('translio_default_language', 'en');
 
-        // Filter valid languages, exclude default, limit to 4
+        // Filter valid languages, exclude default, limit to 10
         $valid = array();
         foreach ($languages as $lang) {
             $lang = sanitize_text_field($lang);
             if (in_array($lang, $available, true) && $lang !== $default && !in_array($lang, $valid, true)) {
                 $valid[] = $lang;
             }
-            if (count($valid) >= 4) {
+            if (count($valid) >= 10) {
                 break;
             }
         }

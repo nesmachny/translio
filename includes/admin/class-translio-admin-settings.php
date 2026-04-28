@@ -453,7 +453,7 @@ class Translio_Admin_Settings {
                             </th>
                             <td>
                                 <fieldset>
-                                    <legend class="screen-reader-text"><?php esc_html_e('Select up to 4 translation languages', 'translio'); ?></legend>
+                                    <legend class="screen-reader-text"><?php esc_html_e('Select up to 10 translation languages', 'translio'); ?></legend>
 
                                     <?php $selected_count = count($secondary_languages); ?>
 
@@ -461,7 +461,7 @@ class Translio_Admin_Settings {
                                         <?php foreach ($languages as $code => $data) :
                                             if ($code === $default_language) continue; // Skip default
                                             $is_checked = in_array($code, $secondary_languages);
-                                            $is_disabled = !$is_checked && $selected_count >= 4;
+                                            $is_disabled = !$is_checked && $selected_count >= 10;
                                         ?>
                                         <label class="translio-language-checkbox <?php echo $is_disabled ? 'disabled' : ''; ?>">
                                             <input type="checkbox"
@@ -478,9 +478,9 @@ class Translio_Admin_Settings {
                                     </div>
 
                                     <p class="description" style="margin-top: 10px;">
-                                        <?php esc_html_e('Select up to 4 languages to translate your content into.', 'translio'); ?>
+                                        <?php esc_html_e('Select up to 10 languages to translate your content into.', 'translio'); ?>
                                         <br>
-                                        <strong><span id="translio-selected-count"><?php echo $selected_count; ?></span>/4</strong>
+                                        <strong><span id="translio-selected-count"><?php echo $selected_count; ?></span>/10</strong>
                                         <?php esc_html_e('languages selected', 'translio'); ?>
                                     </p>
 
@@ -547,7 +547,7 @@ class Translio_Admin_Settings {
 
                     <script>
                     jQuery(function($) {
-                        var maxLanguages = 4;
+                        var maxLanguages = 10;
                         var $checkboxes = $('.translio-lang-checkbox');
                         var $counter = $('#translio-selected-count');
                         var $prefixes = $('#translio-url-prefixes');
